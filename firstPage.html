@@ -144,14 +144,24 @@
 						//jQuery("#" + msgJson.xiehouId).addClass("unread");
 					} else if (msgJson.type == 'checkInfo') {
 						//jQuery("#checkInfo").show();
-					} else if (msgJson.type == 'match') {
+					} else if (msgJson.type == 'matchTarget') {
 						if (activeTab != "contact.html") {
 							document.getElementById('contactNew').style.display = 'inline';
 						}
-						mui.fire(plus.webview.getWebviewById("meet.html"), 'match', {
+						mui.fire(plus.webview.getWebviewById("meet.html"), 'matchTarget', {
 							meetId: msgJson.meetId
 						});
-						mui.fire(plus.webview.getWebviewById("contact.html"), 'match', {
+						mui.fire(plus.webview.getWebviewById("contact.html"), 'matchTarget', {
+							meetId: msgJson.meetId
+						});
+					} else if (msgJson.type == 'matchCreater') {
+						if (activeTab != "contact.html") {
+							document.getElementById('contactNew').style.display = 'inline';
+						}
+						mui.fire(plus.webview.getWebviewById("meet.html"), 'matchCreater', {
+							meetId: msgJson.meetId
+						});
+						mui.fire(plus.webview.getWebviewById("contact.html"), 'matchCreater', {
 							meetId: msgJson.meetId
 						});
 					} else if (msgJson.type = "invite") {
@@ -176,7 +186,7 @@
 				}
 				if (targetTab == "meet.html") {
 					document.getElementById('meetNew').style.display = 'none';
-				}else if (targetTab == "contact.html") {
+				} else if (targetTab == "contact.html") {
 					document.getElementById('contactNew').style.display = 'none';
 				}
 				//先隐藏当前的

@@ -70,7 +70,7 @@
 			ns || openw.addEventListener('loaded', function() { //页面加载完成后才显示
 				//		setTimeout(function(){//延后显示可避免低端机上动画时白屏
 				//openw.show('pop-in', at);
-				openw.show(aniShow ||'slide-in-right', at);
+				openw.show(aniShow || 'slide-in-right', at);
 				closeWaiting();
 				//		},200);
 			}, false);
@@ -238,6 +238,18 @@
 				radios[i].checked = true;
 			}
 		}
+	}
+
+	w.formatDateFromObjectId = function(objectId) {
+		var date = new Date(parseInt(objectId.substring(0, 8), 16) * 1000);
+		var hours = date.getHours();
+		var minutes = date.getMinutes();
+		var ampm = hours >= 12 ? '下午' : '上午';
+		hours = hours % 12;
+		hours = hours ? hours : 12; // the hour '0' should be '12'
+		minutes = minutes < 10 ? '0' + minutes : minutes;
+		var strTime = hours + ':' + minutes + ' ' + ampm;
+		return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + " " + strTime;
 	}
 
 	w.dateFromObjectId = function(objectId) {

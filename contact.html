@@ -44,44 +44,40 @@
 							document.querySelector('#contactList').innerHTML = "";
 							var list = result.list;
 							list.forEach(function(meet) {
-								var dateStr = dateFromObjectId(meet._id);
+								var dateStr = formatDateFromObjectId(meet._id);
 								var paramJsonStr = "{meetId:'" + meet._id + "'}";
 								var fnStr = "";
 
-								//if (meet.creater == curUser) {
+								if (meet.creater == curUser) {
 
-//									if (meet.status == '待回复') {
-//										//fnStr = "onclick=clickXiehou('xiehouPic3.html','" + xiehou._id + "','" + xiehou.fileName + "')";
-//									}
-//									if (meet.status == '待确认') {
-//										//fnStr = "onclick=clickXiehou('xiehouPic2.html','" + xiehou._id + "')";
-//									}
+									//									if (meet.status == '待回复') {
+									//										//fnStr = "onclick=clickXiehou('xiehouPic3.html','" + xiehou._id + "','" + xiehou.fileName + "')";
+									//									}
+									//									if (meet.status == '待确认') {
+									//										//fnStr = "onclick=clickXiehou('xiehouPic2.html','" + xiehou._id + "')";
+									//									}
 									var li = '<li id="' + meet._id + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
 										<a href="#">\
-										<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/cbd.jpg">\
-										<div class="mui-media-body">\
+										<span class="mui-icon mui-icon-paperplane"></span>\
 										' + meet.status + '\
-										<p class="mui-ellipsis">' + dateStr + '-' + deadlineFromObjectId(meet._id) + '</p>\
-										</div>\
+										<p class="mui-ellipsis">' + dateStr + '</p>\
 										</a>\
 										</li>';
-//								} else {
-//									if (meet.status == '待回复') {
-//										//fnStr = "onclick=clickXiehou('xiehouPic3.html','" + xiehou._id + "','" + xiehou.fileName + "')";
-//									}
-//									if (meet.status == '待确认') {
-//										//fnStr = "onclick=clickXiehou('xiehouPic2.html','" + xiehou._id + "')";
-//									}
-//									var li = '<li id="' + meet._id + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
-//										<a href="#">\
-//										<img class="mui-media-object mui-pull-right" src="http://dcloudio.github.io/mui/assets/img/cbd.jpg">\
-//										<div class="mui-media-body mui-pull-right">\
-//										' + meet.status + '\
-//										<p class="mui-ellipsis">' + dateStr + '-' + deadlineFromObjectId(meet._id) + '</p>\
-//										</div>\
-//										</a>\
-//										</li>';
-//								}
+								} else {
+									//									if (meet.status == '待回复') {
+									//										//fnStr = "onclick=clickXiehou('xiehouPic3.html','" + xiehou._id + "','" + xiehou.fileName + "')";
+									//									}
+									//									if (meet.status == '待确认') {
+									//										//fnStr = "onclick=clickXiehou('xiehouPic2.html','" + xiehou._id + "')";
+									//									}
+									var li = '<li id="' + meet._id + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
+										<a href="#">\
+										<span class="mui-icon mui-icon-email"></span>\
+										' + meet.status + '\
+										<p class="mui-ellipsis">' + dateStr + '</p>\
+										</a>\
+										</li>';
+								}
 								document.querySelector('#contactList').innerHTML += li;
 							});
 						} else {
@@ -94,7 +90,7 @@
 				);
 			}
 
-			window.addEventListener('match', function(event) {
+			window.addEventListener('matchTarget', function(event) {
 				var meetId = event.detail.meetId;
 				//add to page list
 				var paramJsonStr = "{meetId:'" + meetId + "'}";
@@ -102,11 +98,25 @@
 				fnStr = "onclick=clicked('chat.html'," + paramJsonStr + "')";
 				var li = '<li id="_' + meetId + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
 							<a href="#">\
-							<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/cbd.jpg">\
-							<div class="mui-media-body mui-pull-left">\
+							<span class="mui-icon mui-icon-email"></span>\
 							<span class="status">' + '成功' + '</span>\
 							<p class="mui-ellipsis">' + deadlineFromObjectId(meetId) + '</p>\
-							</div>\
+							</a>\
+							</li>';
+				document.querySelector('#contactList').innerHTML = li + document.querySelector('#contactList').innerHTML;
+			}, false);
+
+			window.addEventListener('matchCreater', function(event) {
+				var meetId = event.detail.meetId;
+				//add to page list
+				var paramJsonStr = "{meetId:'" + meetId + "'}";
+				var fnStr = "";
+				fnStr = "onclick=clicked('chat.html'," + paramJsonStr + "')";
+				var li = '<li id="_' + meetId + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
+							<a href="#">\
+							<span class="mui-icon mui-icon-paperplane"></span>\
+							<span class="status">' + '成功' + '</span>\
+							<p class="mui-ellipsis">' + deadlineFromObjectId(meetId) + '</p>\
 							</a>\
 							</li>';
 				document.querySelector('#contactList').innerHTML = li + document.querySelector('#contactList').innerHTML;
