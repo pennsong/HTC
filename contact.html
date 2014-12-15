@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<script src="js/mui.min.js"></script>
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<script src="js/common.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			mui.init({
+				//				pullRefresh: {
+				//					container: "#contactList", //待刷新区域标识，querySelector能定位的css选择器均可，比如：id、.class等
+				//					down: {
+				//						contentdown: "下拉可以刷新", //可选，在下拉可刷新状态时，下拉刷新控件上显示的标题内容
+				//						contentover: "释放立即刷新", //可选，在释放可刷新状态时，下拉刷新控件上显示的标题内容
+				//						contentrefresh: "正在刷新...", //可选，正在刷新状态时，下拉刷新控件上显示的标题内容
+				//						callback: pullfresh //必选，刷新函数，根据具体业务来编写，比如通过ajax从服务器获取新数据；
+				//					}
+				//				}
+			});
+
+			mui.plusReady(function() {
+				initVal();
+			});
+
+			function pullfresh() {
+				//业务逻辑代码，比如通过ajax从服务器获取新数据；
+				//注意，加载完新数据后，必须执行如下代码，两个注意事项：
+				//1、若为ajax请求，则需将如下代码放置在处理完ajax响应数据之后
+				//2、注意this的作用域，若存在匿名函数，需将this复制后使用，参考hello mui中的代码示例；
+				initVal();
+				mui('#contactList').pullRefresh().endPulldownToRefresh();
+			}
+
+
+			function initVal() {
+				var curUser = plus.storage.getItem('userName');
+				var data = "userName=" + curUser;
+				ppXhr(ppUrl + "getSuccessList", "POST", data,
+					function(result) {
+						if (result.status == "OK") {
+							document.querySelector('#contactList').innerHTML = "";
+							var list = result.list;
+							list.forEach(function(meet) {
+								var dateStr = dateFromObjectId(meet._id);
+								var paramJsonStr = "{meetId:'" + meet._id + "'}";
+								var fnStr = "";
+
+								//if (meet.creater == curUser) {
+
+//									if (meet.status == '待回复') {
+//										//fnStr = "onclick=clickXiehou('xiehouPic3.html','" + xiehou._id + "','" + xiehou.fileName + "')";
+//									}
+//									if (meet.status == '待确认') {
+//										//fnStr = "onclick=clickXiehou('xiehouPic2.html','" + xiehou._id + "')";
+//									}
+									var li = '<li id="' + meet._id + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
+										<a href="#">\
+										<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/cbd.jpg">\
+										<div class="mui-media-body">\
+										' + meet.status + '\
+										<p class="mui-ellipsis">' + dateStr + '-' + deadlineFromObjectId(meet._id) + '</p>\
+										</div>\
+										</a>\
+										</li>';
+//								} else {
+//									if (meet.status == '待回复') {
+//										//fnStr = "onclick=clickXiehou('xiehouPic3.html','" + xiehou._id + "','" + xiehou.fileName + "')";
+//									}
+//									if (meet.status == '待确认') {
+//										//fnStr = "onclick=clickXiehou('xiehouPic2.html','" + xiehou._id + "')";
+//									}
+//									var li = '<li id="' + meet._id + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
+//										<a href="#">\
+//										<img class="mui-media-object mui-pull-right" src="http://dcloudio.github.io/mui/assets/img/cbd.jpg">\
+//										<div class="mui-media-body mui-pull-right">\
+//										' + meet.status + '\
+//										<p class="mui-ellipsis">' + dateStr + '-' + deadlineFromObjectId(meet._id) + '</p>\
+//										</div>\
+//										</a>\
+//										</li>';
+//								}
+								document.querySelector('#contactList').innerHTML += li;
+							});
+						} else {
+							alert("失败:" + result.msg.err);
+						}
+					},
+					function(result) {
+						alert("xhr请求失败：" + result.status);
+					}
+				);
+			}
+
+			window.addEventListener('match', function(event) {
+				var meetId = event.detail.meetId;
+				//add to page list
+				var paramJsonStr = "{meetId:'" + meetId + "'}";
+				var fnStr = "";
+				fnStr = "onclick=clicked('chat.html'," + paramJsonStr + "')";
+				var li = '<li id="_' + meetId + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
+							<a href="#">\
+							<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/cbd.jpg">\
+							<div class="mui-media-body mui-pull-left">\
+							<span class="status">' + '成功' + '</span>\
+							<p class="mui-ellipsis">' + deadlineFromObjectId(meetId) + '</p>\
+							</div>\
+							</a>\
+							</li>';
+				document.querySelector('#contactList').innerHTML = li + document.querySelector('#contactList').innerHTML;
+			}, false);
+		</script>
+	</head>
+
+	<body>
+
+		<div class="mui-content">
+			<ul class="mui-table-view" id="contactList">
+
+			</ul>
+		</div>
+	</body>
+
+</html>

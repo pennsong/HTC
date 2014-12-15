@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<script src="js/mui.min.js"></script>
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<script src="js/common.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			mui.init({
+				//				pullRefresh: {
+				//					container: "#meetList", //待刷新区域标识，querySelector能定位的css选择器均可，比如：id、.class等
+				//					down: {
+				//						contentdown: "下拉可以刷新", //可选，在下拉可刷新状态时，下拉刷新控件上显示的标题内容
+				//						contentover: "释放立即刷新", //可选，在释放可刷新状态时，下拉刷新控件上显示的标题内容
+				//						contentrefresh: "正在刷新...", //可选，正在刷新状态时，下拉刷新控件上显示的标题内容
+				//						callback: pullfresh //必选，刷新函数，根据具体业务来编写，比如通过ajax从服务器获取新数据；
+				//					}
+				//				}
+			});
+
+			mui.plusReady(function() {
+				initVal();
+			});
+
+			function pullfresh() {
+				//业务逻辑代码，比如通过ajax从服务器获取新数据；
+				//注意，加载完新数据后，必须执行如下代码，两个注意事项：
+				//1、若为ajax请求，则需将如下代码放置在处理完ajax响应数据之后
+				//2、注意this的作用域，若存在匿名函数，需将this复制后使用，参考hello mui中的代码示例；
+				initVal();
+				mui('#meetList').pullRefresh().endPulldownToRefresh();
+			}
+
+
+			function initVal() {
+				var curUser = plus.storage.getItem('userName');
+				var data = "userName=" + curUser;
+				ppXhr(ppUrl + "getMyMeetList", "POST", data,
+					function(result) {
+						if (result.status == "OK") {
+							document.querySelector('#meetList').innerHTML = "";
+							var list = result.list;
+							list.forEach(function(meet) {
+								var dateStr = dateFromObjectId(meet._id);
+								var paramJsonStr = "{meetId:'" + meet._id + "'}";
+								var fnStr = "";
+
+								if (meet.creater == curUser) {
+
+									if (meet.status == '待回复') {
+										fnStr = "onclick=clickXiehouDetail('" + meet._id + "')";
+									}
+									if (meet.status == '待确认') {
+										fnStr = "onclick=clickXiehou('specialPic2.html','" + meet._id + "')";
+									}
+									var li = '<li id="_' + meet._id + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
+										<a href="#">\
+										<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/cbd.jpg">\
+										<div class="mui-media-body">\
+										<span class="status">' + meet.status + '</span>\
+										<p class="mui-ellipsis">' + dateStr + '-' + deadlineFromObjectId(meet._id) + '</p>\
+										</div>\
+										</a>\
+										</li>';
+								} else { //receiver
+									if (meet.status == '待回复') {
+										fnStr = "onclick=replyXiehou('" + meet._id + "')";
+									}
+									var li = '<li id="_' + meet._id + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
+										<a href="#">\
+										<img class="mui-media-object mui-pull-right" src="http://dcloudio.github.io/mui/assets/img/cbd.jpg">\
+										<div class="mui-media-body mui-pull-right">\
+										<span class="status">' + meet.status + '</span>\
+										<p class="mui-ellipsis">' + dateStr + '-' + deadlineFromObjectId(meet._id) + '</p>\
+										</div>\
+										</a>\
+										</li>';
+								}
+								document.querySelector('#meetList').innerHTML += li;
+							});
+						} else {
+							alert("失败:" + result.msg.err);
+						}
+					},
+					function(result) {
+						alert("xhr请求失败：" + result.status);
+					}
+				);
+			}
+
+			function createXiehou(detail) {
+				var lastLocJsonStr = plus.storage.getItem('lastLocation');
+				var lastLoc = JSON.parse(lastLocJsonStr);
+
+				var data = "userName=" + plus.storage.getItem('userName');
+				data += "&lng=" + lastLoc.lng;
+				data += "&lat=" + lastLoc.lat;
+				data += "&target=" + detail.userName;
+				data += "&status=" + "待回复";
+				data += "&targetSex=" + detail.sex;
+				data += "&targetClothesColor=" + detail.clothesColor;
+				data += "&targetClothesStyle=" + detail.clothesStyle;
+				data += "&targetClothesType=" + detail.clothesType;
+				data += "&targetGlasses=" + detail.glasses;
+				data += "&targetHair=" + detail.hair;
+
+				ppXhr(ppUrl + "createMeet", "POST", data,
+					submitXiehouSuccess,
+					function(xhr) {
+						alert("xhr请求失败：" + xhr.status);
+					}
+				);
+			}
+
+			function createXiehou2(detail) {
+				var lastLocJsonStr = plus.storage.getItem('lastLocation');
+				var lastLoc = JSON.parse(lastLocJsonStr);
+
+				var data = "userName=" + plus.storage.getItem('userName');
+				data += "&lng=" + lastLoc.lng;
+				data += "&lat=" + lastLoc.lat;
+				data += "&target=" + "";
+				data += "&status=" + "待确认";
+				data += "&targetSex=" + detail.sex;
+				data += "&targetClothesColor=" + detail.clothesColor;
+				data += "&targetClothesStyle=" + detail.clothesStyle;
+				data += "&targetClothesType=" + detail.clothesType;
+				data += "&targetGlasses=" + detail.glasses;
+				data += "&targetHair=" + detail.hair;
+
+				ppXhr(ppUrl + "createMeet", "POST", data,
+					submitXiehouSuccess,
+					function(xhr) {
+						alert("xhr请求失败：" + xhr.status);
+					}
+				);
+			}
+
+			function submitXiehouSuccess(result) {
+				if (result.status == "OK") {
+					var meet = result.item;
+					var dateStr = dateFromObjectId(meet._id);
+					var paramJsonStr = "{meetId:'" + meet._id + "'}";
+					var fnStr = "";
+
+					if (meet.status == '待回复') {
+						fnStr = "onclick=clickXiehouDetail('" + meet._id + "')";
+					}
+					if (meet.status == '待确认') {
+						fnStr = "onclick=clickXiehou('specialPic2.html','" + meet._id + "')";
+					}
+					var li = '<li id="_' + meet._id + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
+							<a href="#">\
+							<img class="mui-media-object mui-pull-left" src="http://dcloudio.github.io/mui/assets/img/cbd.jpg">\
+							<div class="mui-media-body mui-pull-left">\
+							<span class="status">' + meet.status + '</span>\
+							<p class="mui-ellipsis">' + dateStr + '-' + deadlineFromObjectId(meet._id) + '</p>\
+							</div>\
+							</a>\
+							</li>';
+					document.querySelector('#meetList').innerHTML = li + document.querySelector('#meetList').innerHTML;
+				} else {
+					alert("创建失败,请重试!");
+				}
+			}
+
+			function clickXiehou(pageId, meetId, fileName) {
+				var data = "meetId=" + meetId;
+
+				ppXhr(ppUrl + "getMeet", "POST", data,
+					function(result) {
+						var meet = result.item;
+						//jQuery("#" + xiehou._id).removeClass("unread");
+						plus.storage.setItem('xiehouMeetId', meetId);
+						plus.storage.setItem('xiehouSex', getRadioVal("sex"));
+						plus.storage.setItem('xiehouHair', getRadioVal("hair"));
+						plus.storage.setItem('xiehouGlasses', getRadioVal("glasses"));
+						plus.storage.setItem('xiehouClothesType', getRadioVal("clothesType"));
+						plus.storage.setItem('xiehouClothesColor', getRadioVal("clothesColor"));
+						plus.storage.setItem('xiehouClothesStyle', getRadioVal("clothesStyle"));
+						clicked(pageId);
+					},
+					function(xhr) {
+						alert("xhr请求失败：" + xhr.status);
+					}
+				);
+			}
+
+			function replyXiehou(meetId) {
+				clicked("meetReply.html");
+				plus.storage.setItem('meetReplyMeetId', meetId);
+				
+//				ppXhr(ppUrl + "getMeet", "POST", data,
+//					function(result) {
+//						var meet = result.item;
+//						//jQuery("#" + xiehou._id).removeClass("unread");
+//						plus.storage.setItem('xiehouMeetId', meetId);
+//						plus.storage.setItem('xiehouSex', getRadioVal("sex"));
+//						plus.storage.setItem('xiehouHair', getRadioVal("hair"));
+//						plus.storage.setItem('xiehouGlasses', getRadioVal("glasses"));
+//						plus.storage.setItem('xiehouClothesType', getRadioVal("clothesType"));
+//						plus.storage.setItem('xiehouClothesColor', getRadioVal("clothesColor"));
+//						plus.storage.setItem('xiehouClothesStyle', getRadioVal("clothesStyle"));
+//						clicked("meetReply.html");
+//					},
+//					function(xhr) {
+//						alert("xhr请求失败：" + xhr.status);
+//					}
+//				);
+			}
+
+			function clickXiehouDetail(meetId) {
+				clicked("meetDetail.html", null, null, {
+					meetId: meetId
+				});
+
+			}
+
+			window.addEventListener('createXiehou2', function(event) {
+				createXiehou2(event.detail);
+			}, false);
+
+			window.addEventListener('createXiehou', function(event) {
+				createXiehou(event.detail);
+			}, false);
+
+			window.addEventListener('invite', function(event) {
+				var meetId = event.detail.meetId;
+				fnStr = "onclick=replyXiehou('" + meetId + "')";
+				var li = '<li id="_' + meetId + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
+					<a href="#">\
+					<img class="mui-media-object mui-pull-right" src="http://dcloudio.github.io/mui/assets/img/cbd.jpg">\
+					<div class="mui-media-body mui-pull-right">\
+					<span class="status">' + '待回复' + '</span>\
+					<p class="mui-ellipsis">' + deadlineFromObjectId(meetId) + '</p>\
+					</div>\
+					</a>\
+					</li>';
+				document.querySelector('#meetList').innerHTML = li + document.querySelector('#meetList').innerHTML;
+			}, false);
+
+			window.addEventListener('match', function(event) {
+				console.debug(event.detail.meetId);
+				console.debug(event.detail.type);
+				var meetId = event.detail.meetId;
+				//removeOldSentXiehou
+				document.getElementById('_' + meetId).remove();
+			}, false);
+
+			window.addEventListener('xiehouUpdate', function(event) {
+				var meet = event.detail.data;
+				var paramJsonStr = "{xiehouId:'" + meet._id + "'}";
+				var fnBodyStr = "clickXiehouDetail('" + meet._id + "')";
+				document.getElementById('_' + meet._id).setAttribute("onclick", fnBodyStr);
+				document.querySelectorAll('#_' + meet._id + ' .status')[0].innerHTML = "待回复";
+			}, false);
+		</script>
+	</head>
+
+	<body>
+
+		<div class="mui-content">
+			<ul class="mui-table-view" id="meetList">
+
+			</ul>
+		</div>
+	</body>
+
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<script src="js/mui.min.js"></script>
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<script src="js/common.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			mui.init();
+			mui.plusReady(function() {
+
+			});
+
+			function xhrRegist() {
+				var data = "userName=" + document.getElementById("userName").value;
+				data += "&password=" + document.getElementById("password").value;
+				data += "&nickName=" + document.getElementById("nickName").value;
+				var radios = document.getElementsByName('sex');
+				var sex = null;
+				for (var i = 0, length = radios.length; i < length; i++) {
+					if (radios[i].checked) {
+						// do whatever you want with the checked radio
+						sex = radios[i].value;
+						// only one radio can be logically checked, don't check the rest
+						break;
+					}
+				}
+				data += "&sex=" + sex;
+
+				ppXhr(ppUrl + "regist", "POST", data,
+					function(result) {
+						if (result.status == "OK") {
+							mui.currentWebview.close();
+						} else {
+							alert("注册失败:" + result.msg.err);
+						}
+					},
+					function(result) {
+						alert("xhr请求失败：" + result.status);
+					}
+				);
+			}
+		</script>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">注册</h1>
+		</header>
+		<div class="mui-content">
+			<div class="mui-content-padded">
+				<form class="mui-input-group">
+					<div class="mui-input-row">
+						<label>用户名</label>
+						<input id="userName" type="text" placeholder="手机/QQ/邮箱">
+					</div>
+					<div class="mui-input-row">
+						<label>密码</label>
+						<input id="password" type="text" class="mui-input-clear" placeholder="请输入">
+					</div>
+					<div class="mui-input-row">
+						<label>昵称</label>
+						<input id="nickName" type="text" class="mui-input-clear" placeholder="请输入">
+					</div>
+					<ul class="mui-table-view">
+						<li class="mui-table-view-cell mui-radio mui-left">
+							<input name="sex" type="radio" value="男">男
+						</li>
+						<li class="mui-table-view-cell mui-radio mui-left">
+							<input name="sex" type="radio" value="女">女
+						</li>
+					</ul>
+				</form>
+				<div class="mui-button-row">
+					<button class="mui-btn mui-btn-primary" onclick="xhrRegist()">注册</button>&nbsp;&nbsp;
+				</div>
+			</div>
+		</div>
+	</body>
+
+
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<script src="js/mui.min.js"></script>
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<script src="js/common.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			mui.init();
+
+			mui.plusReady(function() {
+				initVal();
+			});
+
+			function initVal() {
+				var lastLocJsonStr = plus.storage.getItem('lastLocation');
+				plus.storage.setItem('xiehouLoc', lastLocJsonStr);
+				var xiehouLoc = JSON.parse(lastLocJsonStr);
+
+				var data = "userName=" + plus.storage.getItem('userName');
+
+				data += "&lng=" + xiehouLoc.lng;
+				data += "&lat=" + xiehouLoc.lat;
+				data += "&sex=" + plus.storage.getItem('meetReplySex');
+				data += "&hair=" + plus.storage.getItem('meetReplyHair');
+				data += "&glasses=" + plus.storage.getItem('meetReplyGlasses');
+				data += "&clothesType=" + plus.storage.getItem('meetReplyClothesType');
+				data += "&clothesColor=" + plus.storage.getItem('meetReplyClothesColor');
+				data += "&clothesStyle=" + plus.storage.getItem('meetReplyClothesStyle');
+
+				ppXhr(ppUrl + "searchTargetPic", "POST", data,
+					displaySpecialPics,
+					function(xhr) {
+						alert("xhr请求失败：" + xhr.status);
+					}
+				);
+			}
+
+			function displaySpecialPics(result) {
+				document.querySelector('#picList').innerHTML = "";
+				result.item.forEach(function(user) {
+					var li = '<li class="mui-table-view-cell mui-media mui-col-xs-6">\
+								<a href="#" onclick="toLargeSpecialPic(\'' + user.userName + '\',\'' + user.fileName + '\')">\
+									<img class="mui-media-object" src="' + ppUrl + 'images\\' + user.fileName + '" userName="' + user.userName + '">\
+								</a>\
+							</li>';
+					document.querySelector('#picList').innerHTML += li;
+				});
+			}
+
+			function toLargeSpecialPic(userName, fileName) {
+				clicked('replylargeSpecialPic.html', null, null, {
+					userName: userName,
+					fileName: fileName
+				});
+			}
+
+			function no() {
+				plus.webview.close(plus.webview.getWebviewById('meetReply.html'));
+				mui.currentWebview.close();
+			}
+		</script>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<button class="mui-btn mui-pull-right" onclick="no()">
+				没找到
+			</button>
+			<h1 class="mui-title">回复特征图片</h1>
+		</header>
+		<div class="mui-content">
+			<h5 class="mui-content-padded">特征图片:</h5>
+			<ul class="mui-table-view mui-grid-view" id="picList">
+			</ul>
+		</div>
+	</body>
+
+</html>

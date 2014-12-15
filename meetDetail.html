@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<script src="js/mui.min.js"></script>
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<script src="js/common.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			mui.init();
+			mui.plusReady(function() {
+				initVal();
+			});
+
+			function initVal() {
+				var data = "meetId=" + plus.webview.currentWebview().meetId;
+				ppXhr(ppUrl + "getMeet", "POST", data,
+					function(result) {
+						if (result.status == "OK") {
+							var info = result.item;
+							document.querySelector('#pic').setAttribute("src", ppUrl + "images/" + info.targetFileName);
+							document.getElementById('targetSex').appendChild(document.createTextNode(info.targetSex));
+							document.getElementById('targetHair').appendChild(document.createTextNode(info.targetHair));
+							document.getElementById('targetGlasses').appendChild(document.createTextNode(info.targetGlasses));
+							document.getElementById('targetClothesType').appendChild(document.createTextNode(info.targetClothesType));
+							document.getElementById('targetClothesColor').appendChild(document.createTextNode(info.targetClothesColor));
+							document.getElementById('targetClothesStyle').appendChild(document.createTextNode(info.targetClothesStyle));
+						} else {
+							alert("失败:" + result.msg.err);
+						}
+					},
+					function(result) {
+						alert("xhr请求失败：" + result.status);
+					}
+				);
+			}
+		</script>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">邂逅详情</h1>
+		</header>
+		<div class="mui-content">
+			<img id="pic" class="mui-media-object" style="width:100%" src="">
+		</div>
+		<ul class="mui-table-view">
+			<li class="mui-table-view-divider">条件</li>
+			<li class="mui-table-view-cell">性别:<span id="targetSex"></span>
+			</li>
+			<li class="mui-table-view-cell">发型:<span id="targetHair"></span>
+			</li>
+			<li class="mui-table-view-cell">是否带眼镜(不包含墨镜):<span id="targetGlasses"></span>
+			</li>
+			<li class="mui-table-view-cell">衣服类型:<span id="targetClothesType"></span>
+			</li>
+			<li class="mui-table-view-cell">衣服颜色:<span id="targetClothesColor"></span>
+			</li>
+			<li class="mui-table-view-cell">衣服花纹:<span id="targetClothesStyle"></span>
+			</li>
+		</ul>
+	</body>
+
+</html>

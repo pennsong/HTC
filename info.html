@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<script src="js/mui.min.js"></script>
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<script src="js/common.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			mui.init();
+			mui.plusReady(function() {
+				initVal();
+			});
+
+			function initVal() {
+				var data = "userName=" + plus.storage.getItem('userName');
+				ppXhr(ppUrl + "getInfo", "POST", data,
+					function(result) {
+						if (result.status == "OK") {
+							var info = result.item;
+							setRadioVal('hair', info.hair);
+							setRadioVal('glasses', info.glasses);
+							setRadioVal('clothesType', info.clothesType);
+							setRadioVal('clothesColor', info.clothesColor);
+							setRadioVal('clothesStyle', info.clothesStyle);
+							document.querySelector('#pic').setAttribute("src", ppUrl + "images/" + info.fileName);
+							document.querySelector('#fileName').value = info.fileName;
+						} else {
+							alert("失败:" + result.msg.err);
+						}
+					},
+					function(result) {
+						alert("xhr请求失败：" + result.status);
+					}
+				);
+			}
+
+			mui.back = function() {
+				var data = "userName=" + plus.storage.getItem('userName');
+				data += "&hair=" + getRadioVal("hair");
+				data += "&glasses=" + getRadioVal("glasses");
+				data += "&clothesType=" + getRadioVal("clothesType");
+				data += "&clothesColor=" + getRadioVal("clothesColor");
+				data += "&clothesStyle=" + getRadioVal("clothesStyle");
+				data += "&fileName=" + document.getElementById("fileName").value;
+				console.debug("a:" + document.getElementById("fileName").value);
+				ppXhr(ppUrl + "updateInfo", "POST", data,
+					function(result) {
+						if (result.status == "OK") {
+							mui.currentWebview.close();
+						} else {
+							alert("失败:" + result.msg.err);
+						}
+					},
+					function(result) {
+						alert("xhr请求失败：" + result.status);
+						mui.currentWebview.close();
+					}
+				);
+			}
+
+			function getImage() {
+				var cmr = plus.camera.getCamera();
+				cmr.captureImage(function(p) {
+					upload(p)
+					plus.io.resolveLocalFileSystemURL(p, function(entry) {
+						createItem(entry);
+
+					}, function(e) {
+						outLine("读取拍照文件错误：" + e.message);
+					});
+				}, function(e) {
+					outLine("失败：" + e.message);
+				}, {
+					filename: "_doc/camera/"
+				});
+			}
+
+			function upload(path) {
+				console.log("start upload");
+				var server = ppUrl + "uploadSpecialPic";
+				var wt = plus.nativeUI.showWaiting();
+				var task = plus.uploader.createUpload(server, {
+						method: "POST",
+					},
+					function(t, status) { //上传完成
+						if (status == 200) {
+							var fileName = JSON.parse(t.responseText).item;
+							console.log("上传成功：" + fileName);
+							document.querySelector('#fileName').value = fileName;
+							wt.close();
+						} else {
+							outLine("上传失败：" + status);
+							wt.close();
+						}
+					}
+				);
+				task.addData("client", "pp");
+				task.addFile(path, {
+					key: "specialPic"
+				});
+				console.log("task start");
+				task.start();
+			}
+
+			function createItem(entry) {
+				console.log(entry.fullPath);
+				document.querySelector('#pic').setAttribute("src", entry.fullPath);
+			}
+		</script>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-close mui-pull-left"></a>
+			<h1 class="mui-title">个人特征</h1>
+		</header>
+		<div class="mui-content">
+			<h5 class="mui-content-padded">发型</h5>
+			<div class="mui-card">
+				<div class="mui-input-group">
+					<div class="mui-input-row mui-radio">
+						<label>竖起</span>
+						</label>
+						<input name="hair" type="radio" value="竖起">
+					</div>
+					<div class="mui-input-row mui-radio">
+						<label>躺下</span>
+						</label>
+						<input name="hair" type="radio" value="躺下">
+					</div>
+				</div>
+			</div>
+			<h5 class="mui-content-padded">是否带眼镜(不包含墨镜)</h5>
+			<div class="mui-card">
+				<div class="mui-input-group">
+					<div class="mui-input-row mui-radio">
+						<label>带</span>
+						</label>
+						<input name="glasses" type="radio" value="带">
+					</div>
+					<div class="mui-input-row mui-radio">
+						<label>不带</span>
+						</label>
+						<input name="glasses" type="radio" value="不带">
+					</div>
+				</div>
+			</div>
+			<h5 class="mui-content-padded">衣服类型</h5>
+			<div class="mui-card">
+				<div class="mui-input-group">
+					<div class="mui-input-row mui-radio">
+						<label>大衣</span>
+						</label>
+						<input name="clothesType" type="radio" value="大衣">
+					</div>
+					<div class="mui-input-row mui-radio">
+						<label>夹克</span>
+						</label>
+						<input name="clothesType" type="radio" value="夹克">
+					</div>
+					<div class="mui-input-row mui-radio">
+						<label>裙子</span>
+						</label>
+						<input name="clothesType" type="radio" value="裙子">
+					</div>
+				</div>
+			</div>
+			<h5 class="mui-content-padded">衣服颜色</h5>
+			<div class="mui-card">
+				<div class="mui-input-group">
+					<div class="mui-input-row mui-radio">
+						<label><span class="mui-bg-primary" style="display:block;width:25px;height:25px;"></span>
+						</label>
+						<input name="clothesColor" type="radio" value="蓝">
+					</div>
+					<div class="mui-input-row mui-radio">
+						<label><span class="mui-bg-positive" style="display:block;width:25px;height:25px;"></span>
+						</label>
+						<input name="clothesColor" type="radio" value="绿">
+					</div>
+					<div class="mui-input-row mui-radio">
+						<label><span class="mui-bg-negative" style="display:block;width:25px;height:25px;"></span>
+						</label>
+						<input name="clothesColor" type="radio" value="红">
+					</div>
+				</div>
+			</div>
+			<h5 class="mui-content-padded">衣服花纹</h5>
+			<div class="mui-card">
+				<div class="mui-input-group">
+					<div class="mui-input-row mui-radio">
+						<label>纯色</span>
+						</label>
+						<input name="clothesStyle" type="radio" value="纯色">
+					</div>
+					<div class="mui-input-row mui-radio">
+						<label>线框</span>
+						</label>
+						<input name="clothesStyle" type="radio" value="线框">
+					</div>
+					<div class="mui-input-row mui-radio">
+						<label>图案</span>
+						</label>
+						<input name="clothesStyle" type="radio" value="图案">
+					</div>
+				</div>
+			</div>
+			<h5 class="mui-content-padded">特征图片:</h5>
+			<div style="margin: 15px">
+				<button class="mui-btn mui-btn-primary mui-btn-block" onclick="getImage();">拍照</button>
+			</div>
+			<div class="mui-input-row" style="margin: 10px 5px">
+				<img id="pic" style="height: 200px; margin-left: auto; margin-right: auto;display:block" class="mui-media-object" />
+			</div>
+			<input type="hidden" id="fileName" />
+		</div>
+	</body>
+
+</html>
