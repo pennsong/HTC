@@ -86,6 +86,11 @@
 			}
 
 			function createXiehou(detail) {
+				//case fake
+				if (detail.userName == "fake") {
+					return;
+				}
+
 				var lastLocJsonStr = plus.storage.getItem('lastLocation');
 				var lastLoc = JSON.parse(lastLocJsonStr);
 

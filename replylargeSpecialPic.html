@@ -16,7 +16,7 @@
 			});
 
 			function initVal() {
-				document.querySelector('#pic').setAttribute("src", ppUrl + "images\\" + mui.currentWebview.fileName);
+				document.querySelector('#pic').setAttribute("src", ppUrl + "images\\" + getSizeImage(mui.currentWebview.fileName, "_l"));
 			}
 
 			function yes() {

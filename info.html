@@ -25,7 +25,7 @@
 							setRadioVal('clothesType', info.clothesType);
 							setRadioVal('clothesColor', info.clothesColor);
 							setRadioVal('clothesStyle', info.clothesStyle);
-							document.querySelector('#pic').setAttribute("src", ppUrl + "images/" + info.fileName);
+							document.querySelector('#pic').setAttribute("src", ppUrl + "images/" + getSizeImage(info.fileName, "_m"));
 							document.querySelector('#fileName').value = info.fileName;
 						} else {
 							alert("失败:" + result.msg.err);

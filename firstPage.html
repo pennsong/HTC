@@ -164,13 +164,28 @@
 						mui.fire(plus.webview.getWebviewById("contact.html"), 'matchCreater', {
 							meetId: msgJson.meetId
 						});
-					} else if (msgJson.type = "invite") {
+					} else if (msgJson.type == "invite") {
 						if (activeTab != "meet.html") {
 							document.getElementById('meetNew').style.display = 'inline';
 						}
 						mui.fire(plus.webview.getWebviewById("meet.html"), 'invite', {
 							meetId: msgJson.meetId
 						});
+					} else if (msgJson.type == "chat") {
+						var pageId = "chat.html" + msgJson.meetId;
+						var pageObj = plus.webview.getWebviewById(pageId);
+						if (pageObj != null) {
+							mui.fire(pageObj, 'chatReceived', {
+								content: msgJson.content
+							});
+						} else {
+							if (activeTab != "contact.html") {
+								document.getElementById('contactNew').style.display = 'inline';
+							}
+							mui.fire(plus.webview.getWebviewById('contact.html'), 'chatReceived', {
+								meetId: msgJson.meetId
+							});
+						}
 					}
 
 				}, false);

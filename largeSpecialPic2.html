@@ -16,25 +16,31 @@
 			});
 
 			function initVal() {
-				document.querySelector('#pic').setAttribute("src", ppUrl + "images\\" + mui.currentWebview.fileName);
+				document.querySelector('#pic').setAttribute("src", ppUrl + "images\\" + getSizeImage(mui.currentWebview.fileName, "_l"));
 			}
 
 			function yes() {
-				var data = "meetId=" + plus.storage.getItem('xiehouMeetId');
-				data += "&userName=" + plus.webview.currentWebview().userName;
+				//case fake
+				if (plus.webview.currentWebview().userName == "fake") {
+					plus.webview.close(plus.webview.getWebviewById('specialPic2.html'));
+					mui.currentWebview.close();
+				} else {
+					var data = "meetId=" + plus.storage.getItem('xiehouMeetId');
+					data += "&userName=" + plus.webview.currentWebview().userName;
 
-				ppXhr(ppUrl + "updateMeet", "POST", data,
-					function(result) {
-						mui.fire(plus.webview.getWebviewById("meet.html"), 'xiehouUpdate', {
-							data: result.item
-						});
-						plus.webview.close(plus.webview.getWebviewById('specialPic2.html'));
-						mui.currentWebview.close();
-					},
-					function(xhr) {
-						alert("xhr请求失败：" + xhr.status);
-					}
-				);
+					ppXhr(ppUrl + "updateMeet", "POST", data,
+						function(result) {
+							mui.fire(plus.webview.getWebviewById("meet.html"), 'xiehouUpdate', {
+								data: result.item
+							});
+							plus.webview.close(plus.webview.getWebviewById('specialPic2.html'));
+							mui.currentWebview.close();
+						},
+						function(xhr) {
+							alert("xhr请求失败：" + xhr.status);
+						}
+					);
+				}
 			}
 		</script>
 	</head>

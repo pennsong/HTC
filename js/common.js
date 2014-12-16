@@ -56,14 +56,18 @@
 	 * @param {boolean} ns : 是否不自动显示
 	 * @param {json} extras : 参数列表
 	 */
-	w.clicked = function(id, wa, ns, extras, aniShow) {
+	w.clicked = function(id, wa, ns, extras, aniShow, meetId) {
 		if (openw) { //避免多次打开同一个页面
 			return null;
 		}
 		if (w.plus) {
 			wa && (waiting = plus.nativeUI.showWaiting());
 			var pre = ''; //'http://192.168.1.178:8080/h5/';
-			openw = plus.webview.create(pre + id, id, {
+			var pageId = id;
+			if (meetId) {
+				pageId += meetId;
+			}
+			openw = plus.webview.create(pre + id, pageId, {
 				scrollIndicator: 'none',
 				scalable: false
 			}, extras);
@@ -273,5 +277,15 @@
 			}
 		}
 	}
+
+	String.prototype.splice = function(idx, s) {
+		return (this.slice(0, idx) + s + this.slice(idx));
+	};
+	
+	w.getSizeImage = function(imageSource, extra){
+		return imageSource.splice(imageSource.lastIndexOf('.'), extra);
+	}
+	
+
 
 })(window);

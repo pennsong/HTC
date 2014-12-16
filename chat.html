@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<script src="js/mui.min.js"></script>
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<script src="js/common.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			mui.init();
+			mui.plusReady(function() {
+				initVal();
+			});
+
+			function initVal() {
+				var curUser = plus.storage.getItem('userName');
+				var data = "meetId=" + mui.currentWebview.meetId;
+				ppXhr(ppUrl + "getChatList", "POST", data,
+					function(result) {
+						if (result.status == "OK") {
+							document.querySelector('#chatList').innerHTML = "";
+							if (result.list) {
+								var list = result.list;
+								list.forEach(function(chat) {
+									var dateStr = dateFromObjectId(chat._id);
+
+									if (chat.from == curUser) {
+										var li = '<div class="mui-card mui-pull-left chat">\
+													<span>' + chat.content + '</span>\
+												</div>';
+									} else { //receiver
+										var li = '<div class="mui-card mui-pull-right chat">\
+													<span>' + chat.content + '</span>\
+												</div>';
+									}
+									document.querySelector('#chatList').innerHTML += li;
+								});
+							}
+						} else {
+							alert("失败:" + result.msg.err);
+						}
+					},
+					function(result) {
+						alert("xhr请求失败：" + result.status);
+					}
+				);
+			}
+
+			function send() {
+				var content = document.getElementById("chatInput").value;
+				var curUser = plus.storage.getItem('userName');
+				var data = "meetId=" + mui.currentWebview.meetId;
+				data += "&userName=" + curUser;
+				data += "&content=" + content;
+				ppXhr(ppUrl + "chat", "POST", data,
+					function(result) {
+						if (result.status == "OK") {
+							document.getElementById("chatInput").value = "";
+							var div = '<div class="mui-card mui-pull-left chat">\
+													<span>' + content + '</span>\
+												</div>';
+							document.querySelector('#chatList').innerHTML = div + document.querySelector('#chatList').innerHTML;
+						} else {
+							alert("失败:" + result.msg.err);
+						}
+					},
+					function(result) {
+						alert("xhr请求失败：" + result.status);
+					}
+				);
+			}
+
+			window.addEventListener('chatReceived', function(event) {
+				var content = event.detail.content;
+				//apppend chat content
+				var div = '<div class="mui-card mui-pull-right chat">\
+							<span>' + content + '</span>\
+						</div>'
+				document.querySelector('#chatList').innerHTML = div + document.querySelector('#chatList').innerHTML;
+			}, false);
+		</script>
+		<style>
+			html,
+			body {
+				background-color: #efeff4;
+			}
+			.chat {
+				width: 80%;
+				margin: 5px;
+				word-wrap: break-word"
+
+			}
+			.chat span {
+				padding: 5px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">对话</h1>
+		</header>
+		<div class="mui-content">
+			<div class="mui-input-row" style="margin: 10px 5px;">
+				<textarea id="chatInput" rows="3" placeholder="请输入甜言蜜语"></textarea>
+				<button class="mui-btn mui-btn-primary mui-btn-block" style="margin-bottom: 10px;" onclick="send();">发送</button>
+			</div>
+			<div id="chatList">
+			</div>
+		</div>
+	</body>
+
+
+</html>

@@ -33,6 +33,7 @@
 				ppXhr(ppUrl + "regist", "POST", data,
 					function(result) {
 						if (result.status == "OK") {
+							plus.storage.setItem('userName', result.userName);
 							mui.currentWebview.close();
 						} else {
 							alert("注册失败:" + result.msg.err);

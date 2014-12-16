@@ -46,7 +46,7 @@
 							list.forEach(function(meet) {
 								var dateStr = formatDateFromObjectId(meet._id);
 								var paramJsonStr = "{meetId:'" + meet._id + "'}";
-								var fnStr = "";
+								var fnStr = "onclick=clicked2('chat.html',null,null," + paramJsonStr + ",null,'" + meet._id + "')";
 
 								if (meet.creater == curUser) {
 
@@ -56,7 +56,8 @@
 									//									if (meet.status == '待确认') {
 									//										//fnStr = "onclick=clickXiehou('xiehouPic2.html','" + xiehou._id + "')";
 									//									}
-									var li = '<li id="' + meet._id + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
+									var li = '<li id="_' + meet._id + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
+									<span class="mui-badge mui-badge-danger chatNew" style="display:none">新</span>\
 										<a href="#">\
 										<span class="mui-icon mui-icon-paperplane"></span>\
 										' + meet.status + '\
@@ -70,7 +71,8 @@
 									//									if (meet.status == '待确认') {
 									//										//fnStr = "onclick=clickXiehou('xiehouPic2.html','" + xiehou._id + "')";
 									//									}
-									var li = '<li id="' + meet._id + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
+									var li = '<li id="_' + meet._id + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
+									<span class="mui-badge mui-badge-danger chatNew" style="display:none">新</span>\
 										<a href="#">\
 										<span class="mui-icon mui-icon-email"></span>\
 										' + meet.status + '\
@@ -90,13 +92,21 @@
 				);
 			}
 
+			function clicked2(id, wa, ns, extras, aniShow, meetId) {
+				clicked(id, wa, ns, extras, aniShow, meetId);
+				var tmpMeetId = "_" + meetId;
+				document.querySelectorAll('#' + tmpMeetId + ' .chatNew')[0].style.display = 'none';
+			}
+
 			window.addEventListener('matchTarget', function(event) {
+				console.debug('matchTarget received');
 				var meetId = event.detail.meetId;
 				//add to page list
 				var paramJsonStr = "{meetId:'" + meetId + "'}";
-				var fnStr = "";
-				fnStr = "onclick=clicked('chat.html'," + paramJsonStr + "')";
+				var fnStr = "onclick=clicked2('chat.html',null,null," + paramJsonStr + ",null,'" + meetId + "')";
+
 				var li = '<li id="_' + meetId + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
+				<span class="mui-badge mui-badge-danger chatNew" style="display:none">新</span>\
 							<a href="#">\
 							<span class="mui-icon mui-icon-email"></span>\
 							<span class="status">' + '成功' + '</span>\
@@ -110,9 +120,10 @@
 				var meetId = event.detail.meetId;
 				//add to page list
 				var paramJsonStr = "{meetId:'" + meetId + "'}";
-				var fnStr = "";
-				fnStr = "onclick=clicked('chat.html'," + paramJsonStr + "')";
+				var fnStr = "onclick=clicked2('chat.html',null,null," + paramJsonStr + ",null,'" + meetId + "')";
+
 				var li = '<li id="_' + meetId + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
+				<span class="mui-badge mui-badge-danger chatNew" style="display:none">新</span>\
 							<a href="#">\
 							<span class="mui-icon mui-icon-paperplane"></span>\
 							<span class="status">' + '成功' + '</span>\
@@ -120,6 +131,11 @@
 							</a>\
 							</li>';
 				document.querySelector('#contactList').innerHTML = li + document.querySelector('#contactList').innerHTML;
+			}, false);
+
+			window.addEventListener('chatReceived', function(event) {
+				var meetId = event.detail.meetId;
+				document.getElementById('_' + meetId).querySelector('.chatNew').style.display = 'inline';
 			}, false);
 		</script>
 	</head>

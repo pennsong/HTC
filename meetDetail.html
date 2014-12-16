@@ -20,7 +20,7 @@
 					function(result) {
 						if (result.status == "OK") {
 							var info = result.item;
-							document.querySelector('#pic').setAttribute("src", ppUrl + "images/" + info.targetFileName);
+							document.querySelector('#pic').setAttribute("src", ppUrl + "images/" + getSizeImage(info.targetFileName, "_m"));
 							document.getElementById('targetSex').appendChild(document.createTextNode(info.targetSex));
 							document.getElementById('targetHair').appendChild(document.createTextNode(info.targetHair));
 							document.getElementById('targetGlasses').appendChild(document.createTextNode(info.targetGlasses));
