@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title></title>
+		<script src="js/mui.min.js"></script>
+		<link href="css/mui.min.css" rel="stylesheet" />
+		<script src="js/common.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			mui.init();
+			mui.plusReady(function() {});
+
+			function searchLoc() {
+				var lastLocJsonStr = plus.storage.getItem('lastLocation');
+				var xiehouLoc = JSON.parse(lastLocJsonStr);
+
+				var keyWord = document.getElementById("keyWord").value;
+				var ak = "MgBALVVeCd8THVBi6gPdvsvG";
+				var output = "json";
+				var radius = "2000";
+				var scope = "1";
+
+				var data = "query=" + keyWord;
+				data += "&ak=" + ak;
+				data += "&output=" + output;
+				data += "&radius=" + radius;
+				data += "&scope=" + scope;
+				data += "&location=" + xiehouLoc.lat + "," + xiehouLoc.lng;
+
+
+				var xhr = new plus.net.XMLHttpRequest();
+				xhr.onreadystatechange = function() {
+					switch (xhr.readyState) {
+						case 0:
+							//alert("xhr请求已初始化");
+							break;
+						case 1:
+							//alert("xhr请求已打开");
+							break;
+						case 2:
+							//alert("xhr请求已发送");
+							break;
+						case 3:
+							//alert("xhr请求已响应");
+							break;
+						case 4:
+							if (xhr.status == 200) {
+								var result = JSON.parse(xhr.responseText);
+								displayLocs(result);
+							} else {
+								alert("xhr请求失败：" + xhr.readyState);
+							}
+							break;
+						default:
+							break;
+					}
+				}
+				xhr.open("GET", "http://api.map.baidu.com/place/v2/search?" + data);
+				console.debug("http://api.map.baidu.com/place/v2/search?" + data);
+				xhr.send();
+			}
+
+			function selectLoc(uid, locName) {
+				mui.fire(plus.webview.getWebviewById("meetDefine.html"), 'selectLoc', {
+					uid: uid,
+					locName: locName
+				});
+				mui.currentWebview.close();
+			}
+
+			function displayLocs(result) {
+				document.querySelector('#locList').innerHTML = "";
+				result.results.forEach(function(loc) {
+					uid = loc.uid;
+					locName = loc.name;
+					address = loc.address;
+					var li = '<li class="mui-table-view-cell" onclick="selectLoc(\'' + uid + '\',\'' + locName + '\')">\
+								<span class="mui-ellipsis-2">\
+									' + locName + ',' + address + '\
+								</span>\
+							</li>';
+					document.querySelector('#locList').innerHTML += li;
+				});
+			}
+		</script>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">邂逅-地点</h1>
+		</header>
+		<div class="mui-content">
+			<h5>语音输入搜索框：</h5>
+			<button class="mui-btn mui-btn-primary mui-btn-block" onclick="searchLoc();">查询</button>
+			<div class="mui-input-row mui-search">
+				<input type="search" id="keyWord" class="mui-input-clear" placeholder="请输入场所关键字">
+			</div>
+			<ul class="mui-table-view" id="locList">
+			</ul>
+		</div>
+	</body>
+
+
+</html>
