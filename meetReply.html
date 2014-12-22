@@ -13,6 +13,7 @@
 			mui.plusReady(function() {});
 			
 			function searchTarget(){
+				plus.storage.setItem('meetReplyUid', document.getElementById('locUid').value);
 				plus.storage.setItem('meetReplySex', getRadioVal("sex"));
 				plus.storage.setItem('meetReplyHair', getRadioVal("hair"));
 				plus.storage.setItem('meetReplyGlasses', getRadioVal("glasses"));
@@ -21,6 +22,34 @@
 				plus.storage.setItem('meetReplyClothesStyle', getRadioVal("clothesStyle"));
 				clicked('replySpecialPic.html');
 			}
+			
+			window.addEventListener('selectLoc', function(event) {
+				var uid = event.detail.uid;
+				var locName = event.detail.locName;
+				
+				document.getElementById('locName').innerHTML = locName;
+				document.getElementById('locUid').value = uid;
+				
+				//检查是否回复的是同一个空间的邂逅
+				var data = "meetId=" + plus.storage.getItem('meetReplyMeetId');
+				data += "&uid=" + uid;			
+
+				ppXhr(ppUrl + "checkLocUid", "POST", data,
+					function(result){
+						if (result.match == "YES")
+						{
+							
+						}
+						else
+						{
+							alert('你们不在同一个空间!');
+						}
+					},
+					function(xhr) {
+						alert("xhr请求失败：" + xhr.status);
+					}
+				);
+			}, false);
 		</script>
 	</head>
 
@@ -30,6 +59,17 @@
 			<h1 class="mui-title">回复邂逅</h1>
 		</header>
 		<div class="mui-content">
+			<h5 class="mui-content-padded">地点</h5>
+			<div class="mui-card">
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell">
+						<a id="locName" class="mui-navigate-right" onclick="clicked('meetLocationReply.html')">
+					      请选择
+					    </a>
+					    <input type="hidden" id="locUid" />
+					</li>
+				</ul>
+			</div>
 			<h5 class="mui-content-padded">性别</h5>
 			<div class="mui-card">
 				<div class="mui-input-group">

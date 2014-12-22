@@ -13,6 +13,7 @@
 			mui.plusReady(function() {});
 
 			function searchTarget() {
+				plus.storage.setItem('xiehouUid', document.getElementById('locUid').value);
 				plus.storage.setItem('xiehouSex', getRadioVal("sex"));
 				plus.storage.setItem('xiehouHair', getRadioVal("hair"));
 				plus.storage.setItem('xiehouGlasses', getRadioVal("glasses"));

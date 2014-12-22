@@ -60,6 +60,7 @@
 
 			function no() {
 				mui.fire(plus.webview.getWebviewById("meet.html"), 'createXiehou2', {
+					uid: plus.storage.getItem('xiehouUid'),
 					sex: plus.storage.getItem('xiehouSex'),
 					hair: plus.storage.getItem('xiehouHair'),
 					glasses: plus.storage.getItem('xiehouGlasses'),
