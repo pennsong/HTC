@@ -20,11 +20,41 @@
 			}
 
 			function yes() {
-				var data = "meetId=" + plus.storage.getItem('meetReplyMeetId');
-				data += "&userName=" + plus.webview.currentWebview().userName;
+				var lastLocJsonStr = plus.storage.getItem('lastLocation');
+				var lastLoc = JSON.parse(lastLocJsonStr);
+
+				var data = "userName=" + plus.storage.getItem('userName');
+				data += "&lng=" + lastLoc.lng;
+				data += "&lat=" + lastLoc.lat;
+				data += "&target=" + plus.webview.currentWebview().userName;
+				data += "&status=" + "待回复";
+				data += "&uid=" + plus.storage.getItem('meetReplyUid');
+				data += "&targetSex=" + plus.storage.getItem('meetReplySex');
+				data += "&targetHair=" + plus.storage.getItem('meetReplyHair');
+				data += "&targetGlasses=" + plus.storage.getItem('meetReplyGlasses');
+				data += "&targetClothesType=" + plus.storage.getItem('meetReplyClothesType');
+				data += "&targetClothesColor=" + plus.storage.getItem('meetReplyClothesColor');
+				data += "&targetClothesStyle=" + plus.storage.getItem('meetReplyClothesStyle');
+
+				data += "&meetId=" + plus.storage.getItem('meetReplyMeetId');
 
 				ppXhr(ppUrl + "replyMeet", "POST", data,
 					function(result) {
+						//如果没有匹配
+						if (result.item == null) {
+							
+							mui.fire(plus.webview.getWebviewById("meet.html"), 'createXiehou', {
+								userName: mui.currentWebview.userName,
+								fileName: mui.currentWebview.fileName,
+								uid: plus.storage.getItem('meetReplyUid'),
+								sex: plus.storage.getItem('meetReplySex'),
+								hair: plus.storage.getItem('meetReplyHair'),
+								glasses: plus.storage.getItem('xiehouGlasses'),
+								clothesType: plus.storage.getItem('meetReplyClothesType'),
+								clothesColor: plus.storage.getItem('meetReplyClothesColor'),
+								clothesStyle: plus.storage.getItem('meetReplyClothesStyle')
+							});
+						}
 						plus.webview.close(plus.webview.getWebviewById('replySpecialPic.html'));
 						plus.webview.close(plus.webview.getWebviewById('meetReply.html'));
 						mui.currentWebview.close();

@@ -8,46 +8,138 @@
 		<script src="js/mui.min.js"></script>
 		<link href="css/mui.min.css" rel="stylesheet" />
 		<script src="js/common.js"></script>
+		<!--<script src="http://inner.channelwin.info:4000/socket.io/socket.io.js"></script>-->
+		<script src="http://192.168.1.9:3000/socket.io/socket.io.js"></script>
 		<script type="text/javascript" charset="utf-8">
 			mui.init();
+			var online = false;
 			mui.plusReady(function() {
 				initVal();
-			});
 
-			function initVal() {
-				var curUser = plus.storage.getItem('userName');
-				var data = "meetId=" + mui.currentWebview.meetId;
-				ppXhr(ppUrl + "getChatList", "POST", data,
-					function(result) {
-						if (result.status == "OK") {
-							document.querySelector('#chatList').innerHTML = "";
-							if (result.list) {
-								var list = result.list;
-								list.forEach(function(chat) {
-									var dateStr = dateFromObjectId(chat._id);
+				socket = io.connect(ppUrl, {
+					query: "foo=bar&a=b"
+				});
+				//socket.emit('join', plus.webview.currentWebview().meetId + ":" + plus.storage.getItem("nickName"));
 
-									if (chat.from == curUser) {
-										var li = '<div class="mui-card mui-pull-left chat">\
-													<span>' + chat.content + '</span>\
-												</div>';
-									} else { //receiver
-										var li = '<div class="mui-card mui-pull-right chat">\
-													<span>' + chat.content + '</span>\
-												</div>';
-									}
-									document.querySelector('#chatList').innerHTML += li;
-								});
-							}
-						} else {
-							alert("失败:" + result.msg.err);
-						}
-					},
-					function(result) {
-						alert("xhr请求失败：" + result.status);
+				socket.on('connect', function(content) {
+					online = true;
+					console.log("con");
+					//socket.emit('join', mui.currentWebview.meetId + ":" + plus.storage.getItem("nickName"));
+				});
+				socket.on('reconnect', function(content) {
+					console.log("rrr");
+					//socket.emit('join', mui.currentWebview.meetId + ":" + plus.storage.getItem("nickName"));
+				});
+
+				socket.on('disconnect', function(content) {
+					online = false;
+					console.log("dis");
+					//socket.emit('join', mui.currentWebview.meetId + ":" + plus.storage.getItem("nickName"));
+				});
+
+
+				socket.on('serverMessage', function(content) {
+					addMessage(content);
+				});
+
+				function sendCommand(command, args) {
+					if (command === 'j') {
+						socket.emit('join', args);
+					} else {
+						alert('unknown command: ' + command);
 					}
-				);
-			}
+				}
 
+
+
+				var inputElement = document.getElementById('chatInput');
+				var sendElement = document.getElementById('send');
+
+
+
+				function initVal() {
+					var curUser = plus.storage.getItem('userName');
+					console.debug(plus.webview.currentWebview().meetId);
+					var data = "meetId=" + plus.webview.currentWebview().meetId;
+					ppXhr(ppUrl + "getChatList", "POST", data,
+						function(result) {
+							if (result.status == "OK") {
+								//document.querySelector('#messages').innerHTML = "";
+								if (result.list) {
+									var list = result.list;
+									list.forEach(function(chat) {
+										var dateStr = dateFromObjectId(chat._id);
+
+										if (chat.from == curUser) {
+											//											var li = '<div class="mui-card mui-pull-left chat">\
+											//													<span>' + chat.content + '</span>\
+											//												</div>';
+											addMessage("我:" + chat.content);
+										} else { //receiver
+											//											var li = '<div class="mui-card mui-pull-right chat">\
+											//													<span>' + chat.content + '</span>\
+											//												</div>';
+											addMessage("TA:" + chat.content);
+										}
+										//document.querySelector('#messages').innerHTML += li;
+									});
+								}
+							} else {
+								alert("失败:" + result.msg.err);
+							}
+						},
+						function(result) {
+							alert("xhr请求失败：" + result.status);
+						}
+					);
+				}
+			});
+		</script>
+		<style>
+			html,
+			body {
+				background-color: #efeff4;
+			}
+			.chat {
+				width: 80%;
+				margin: 5px;
+				word-wrap: break-word"
+
+			}
+			.chat span {
+				padding: 5px;
+			}
+			#input {
+				width: 200px;
+			}
+			#messages {
+				position: fixed;
+				top: 240px;
+				bottom: 10px;
+				left: 8px;
+				right: 8px;
+				border: 1px solid #EEEEEE;
+				padding: 8px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">对话</h1>
+		</header>
+		<div class="mui-content">
+			<div class="mui-input-row" style="margin: 10px 5px;">
+				<textarea id="chatInput" rows="3" placeholder="请输入甜言蜜语"></textarea>
+				<button class="mui-btn mui-btn-primary mui-btn-block" style="margin-bottom: 10px;" onclick="ff();">发送</button>
+			</div>
+			<div id="messages">
+			</div>
+
+
+		</div>
+		<script type="text/javascript" charset="utf-8">
 			function send() {
 				var content = document.getElementById("chatInput").value;
 				var curUser = plus.storage.getItem('userName');
@@ -80,37 +172,36 @@
 						</div>'
 				document.querySelector('#chatList').innerHTML = div + document.querySelector('#chatList').innerHTML;
 			}, false);
+
+			function ff() {
+				sendMessage(document.getElementById('chatInput').value);
+				document.getElementById('chatInput').value = '';
+				return false;
+
+			};
+
+			function sendMessage(message) {
+				var commandMatch = message.match(/^\/(\w*)(.*)/);
+				if (commandMatch) {
+					sendCommand(commandMatch[1], commandMatch[2].trim());
+				} else {
+					socket.emit('clientMessage', message);
+				}
+			}
+
+			var messagesElement = document.getElementById('messages');
+			var lastMessageElement = null;
+
+			function addMessage(message) {
+				var newMessageElement = document.createElement('div');
+				var newMessageText = document.createTextNode(message);
+
+				newMessageElement.appendChild(newMessageText);
+				messagesElement.insertBefore(newMessageElement,
+					lastMessageElement);
+				lastMessageElement = newMessageElement;
+			}
 		</script>
-		<style>
-			html,
-			body {
-				background-color: #efeff4;
-			}
-			.chat {
-				width: 80%;
-				margin: 5px;
-				word-wrap: break-word"
-
-			}
-			.chat span {
-				padding: 5px;
-			}
-		</style>
-	</head>
-
-	<body>
-		<header class="mui-bar mui-bar-nav">
-			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
-			<h1 class="mui-title">对话</h1>
-		</header>
-		<div class="mui-content">
-			<div class="mui-input-row" style="margin: 10px 5px;">
-				<textarea id="chatInput" rows="3" placeholder="请输入甜言蜜语"></textarea>
-				<button class="mui-btn mui-btn-primary mui-btn-block" style="margin-bottom: 10px;" onclick="send();">发送</button>
-			</div>
-			<div id="chatList">
-			</div>
-		</div>
 	</body>
 
 
