@@ -12,27 +12,25 @@
 		<script src="http://192.168.1.9:3000/socket.io/socket.io.js"></script>
 		<script type="text/javascript" charset="utf-8">
 			mui.init();
-			var online = false;
+			var socketId = null;
 			mui.plusReady(function() {
 				initVal();
 
-				socket = io.connect(ppUrl, {
-					query: "foo=bar&a=b"
-				});
-				//socket.emit('join', plus.webview.currentWebview().meetId + ":" + plus.storage.getItem("nickName"));
+				socket = io.connect(ppUrl);
 
-				socket.on('connect', function(content) {
-					online = true;
-					console.log("con");
-					//socket.emit('join', mui.currentWebview.meetId + ":" + plus.storage.getItem("nickName"));
-				});
-				socket.on('reconnect', function(content) {
-					console.log("rrr");
+				socket.on('connect', function() {
+					socket.emit('joinChat',
+						plus.storage.getItem("userName"),
+						function(theSocketId) {
+							socketId = theSocketId;
+							console.log(socketId);
+						});
 					//socket.emit('join', mui.currentWebview.meetId + ":" + plus.storage.getItem("nickName"));
 				});
 
-				socket.on('disconnect', function(content) {
-					online = false;
+				socket.on('disconnect', function() {
+					//plus.nativeUI.toast("网络不给力哦!");
+					socketId = null;
 					console.log("dis");
 					//socket.emit('join', mui.currentWebview.meetId + ":" + plus.storage.getItem("nickName"));
 				});
@@ -59,7 +57,7 @@
 
 				function initVal() {
 					var curUser = plus.storage.getItem('userName');
-					console.debug(plus.webview.currentWebview().meetId);
+					//console.debug(plus.webview.currentWebview().meetId);
 					var data = "meetId=" + plus.webview.currentWebview().meetId;
 					ppXhr(ppUrl + "getChatList", "POST", data,
 						function(result) {
