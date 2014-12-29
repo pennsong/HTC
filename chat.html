@@ -165,7 +165,7 @@
 			};
 
 			function sendMessage(content) {
-				mui.fire(plus.webview.getWebviewById("contact.html"), 'clientMessage', {
+				mui.fire(plus.webview.getWebviewById("firstPage.html"), 'clientMessage', {
 					from: plus.storage.getItem('userName'),
 					to: friendUserName,
 					content: content

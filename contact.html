@@ -8,9 +8,7 @@
 		<script src="js/mui.min.js"></script>
 		<link href="css/mui.min.css" rel="stylesheet" />
 		<script src="js/common.js"></script>
-		<script src="http://192.168.1.9:3000/socket.io/socket.io.js"></script>
 		<script type="text/javascript" charset="utf-8">
-			var socket = null;
 			mui.init({
 				//				pullRefresh: {
 				//					container: "#contactList", //待刷新区域标识，querySelector能定位的css选择器均可，比如：id、.class等
@@ -38,35 +36,8 @@
 
 
 			function initVal() {
-				var socketId = null;
-				socket = io.connect(ppUrl);
 
-				socket.on('connect', function() {
-					socket.emit('joinChat',
-						plus.storage.getItem("userName"),
-						function(theSocketId) {
-							socketId = theSocketId;
-							console.log(socketId);
-						});
-				});
 
-				socket.on('disconnect', function() {
-					socketId = null;
-					console.log("dis");
-				});
-				
-				socket.on('serverMessage', function(msg, fn) {
-					var pageObj = plus.webview.getWebviewById("chat.html" + msg.from);
-					console.log("chat.html" + msg.from);
-					if (pageObj != null) {
-						fn(true);
-						mui.fire(pageObj, 'serverMessageReceived', msg);
-					}
-					else
-					{
-						document.querySelectorAll('#_' + msg.from + ' .chatNew')[0].style.display = 'inline-block';
-					}
-				});
 
 				var curUser = plus.storage.getItem('userName');
 				var data = "userName=" + curUser;
@@ -156,14 +127,9 @@
 				document.querySelector('#contactList').innerHTML = li + document.querySelector('#contactList').innerHTML;
 			}, false);
 
-			window.addEventListener('clientMessage', function(event) {
-				var msg = event.detail;
-				socket.emit('clientMessage', event.detail, function(msg2) {
-					var pageObj = plus.webview.getWebviewById("chat.html" + msg.to);
-					if (pageObj != null) {
-						mui.fire(pageObj, 'clientMessageReceived', msg2);
-					}
-				});
+			window.addEventListener('newMsg', function(event) {
+				var friendUserName = event.detail.friendUserName;
+				document.querySelectorAll('#_' + friendUserName + ' .chatNew')[0].style.display = 'inline';
 			}, false);
 		</script>
 	</head>
