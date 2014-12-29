@@ -8,7 +8,9 @@
 		<script src="js/mui.min.js"></script>
 		<link href="css/mui.min.css" rel="stylesheet" />
 		<script src="js/common.js"></script>
+		<script src="http://192.168.1.9:3000/socket.io/socket.io.js"></script>
 		<script type="text/javascript" charset="utf-8">
+			var socket = null;
 			mui.init({
 				//				pullRefresh: {
 				//					container: "#contactList", //待刷新区域标识，querySelector能定位的css选择器均可，比如：id、.class等
@@ -36,6 +38,36 @@
 
 
 			function initVal() {
+				var socketId = null;
+				socket = io.connect(ppUrl);
+
+				socket.on('connect', function() {
+					socket.emit('joinChat',
+						plus.storage.getItem("userName"),
+						function(theSocketId) {
+							socketId = theSocketId;
+							console.log(socketId);
+						});
+				});
+
+				socket.on('disconnect', function() {
+					socketId = null;
+					console.log("dis");
+				});
+				
+				socket.on('serverMessage', function(msg, fn) {
+					var pageObj = plus.webview.getWebviewById("chat.html" + msg.from);
+					console.log("chat.html" + msg.from);
+					if (pageObj != null) {
+						fn(true);
+						mui.fire(pageObj, 'serverMessageReceived', msg);
+					}
+					else
+					{
+						document.querySelectorAll('#_' + msg.from + ' .chatNew')[0].style.display = 'inline-block';
+					}
+				});
+
 				var curUser = plus.storage.getItem('userName');
 				var data = "userName=" + curUser;
 				ppXhr(ppUrl + "getSuccessList", "POST", data,
@@ -45,18 +77,13 @@
 							var list = result.list;
 							list.forEach(function(meet) {
 								var dateStr = formatDateFromObjectId(meet._id);
-								var paramJsonStr = "{meetId:'" + meet._id + "'}";
-								var fnStr = "onclick=clicked2('chat.html',null,null," + paramJsonStr + ",null,'" + meet._id + "')";
+								var paramJsonStr = null;
+								var fnStr = null;
 
 								if (meet.creater == curUser) {
-
-									//									if (meet.status == '待回复') {
-									//										//fnStr = "onclick=clickXiehou('xiehouPic3.html','" + xiehou._id + "','" + xiehou.fileName + "')";
-									//									}
-									//									if (meet.status == '待确认') {
-									//										//fnStr = "onclick=clickXiehou('xiehouPic2.html','" + xiehou._id + "')";
-									//									}
-									var li = '<li id="_' + meet._id + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
+									paramJsonStr = "{friendUserName:'" + meet.target + "'}";
+									fnStr = "onclick=clicked2('chat.html',null,null," + paramJsonStr + ",null,'" + meet.target + "')";
+									var li = '<li id="_' + meet.target + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
 									<span class="mui-badge mui-badge-danger chatNew" style="display:none">新</span>\
 										<a href="#">\
 										<span class="mui-icon mui-icon-paperplane"></span>\
@@ -65,13 +92,9 @@
 										</a>\
 										</li>';
 								} else {
-									//									if (meet.status == '待回复') {
-									//										//fnStr = "onclick=clickXiehou('xiehouPic3.html','" + xiehou._id + "','" + xiehou.fileName + "')";
-									//									}
-									//									if (meet.status == '待确认') {
-									//										//fnStr = "onclick=clickXiehou('xiehouPic2.html','" + xiehou._id + "')";
-									//									}
-									var li = '<li id="_' + meet._id + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
+									paramJsonStr = "{friendUserName:'" + meet.creater + "'}";
+									fnStr = "onclick=clicked2('chat.html',null,null," + paramJsonStr + ",null,'" + meet.creater + "')";
+									var li = '<li id="_' + meet.creater + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
 									<span class="mui-badge mui-badge-danger chatNew" style="display:none">新</span>\
 										<a href="#">\
 										<span class="mui-icon mui-icon-email"></span>\
@@ -92,10 +115,10 @@
 				);
 			}
 
-			function clicked2(id, wa, ns, extras, aniShow, meetId) {
-				clicked(id, wa, ns, extras, aniShow, meetId);
-				var tmpMeetId = "_" + meetId;
-				document.querySelectorAll('#' + tmpMeetId + ' .chatNew')[0].style.display = 'none';
+			function clicked2(id, wa, ns, extras, aniShow, friendUserName) {
+				clicked(id, wa, ns, extras, aniShow, friendUserName);
+				var tmpFriendUserName = "_" + friendUserName;
+				document.querySelectorAll('#' + tmpFriendUserName + ' .chatNew')[0].style.display = 'none';
 			}
 
 			window.addEventListener('matchTarget', function(event) {
@@ -133,9 +156,14 @@
 				document.querySelector('#contactList').innerHTML = li + document.querySelector('#contactList').innerHTML;
 			}, false);
 
-			window.addEventListener('chatReceived', function(event) {
-				var meetId = event.detail.meetId;
-				document.getElementById('_' + meetId).querySelector('.chatNew').style.display = 'inline';
+			window.addEventListener('clientMessage', function(event) {
+				var msg = event.detail;
+				socket.emit('clientMessage', event.detail, function(msg2) {
+					var pageObj = plus.webview.getWebviewById("chat.html" + msg.to);
+					if (pageObj != null) {
+						mui.fire(pageObj, 'clientMessageReceived', msg2);
+					}
+				});
 			}, false);
 		</script>
 	</head>

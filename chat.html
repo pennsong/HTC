@@ -8,91 +8,7 @@
 		<script src="js/mui.min.js"></script>
 		<link href="css/mui.min.css" rel="stylesheet" />
 		<script src="js/common.js"></script>
-		<!--<script src="http://inner.channelwin.info:4000/socket.io/socket.io.js"></script>-->
-		<script src="http://192.168.1.9:3000/socket.io/socket.io.js"></script>
-		<script type="text/javascript" charset="utf-8">
-			mui.init();
-			var socketId = null;
-			mui.plusReady(function() {
-				initVal();
 
-				socket = io.connect(ppUrl);
-
-				socket.on('connect', function() {
-					socket.emit('joinChat',
-						plus.storage.getItem("userName"),
-						function(theSocketId) {
-							socketId = theSocketId;
-							console.log(socketId);
-						});
-					//socket.emit('join', mui.currentWebview.meetId + ":" + plus.storage.getItem("nickName"));
-				});
-
-				socket.on('disconnect', function() {
-					//plus.nativeUI.toast("网络不给力哦!");
-					socketId = null;
-					console.log("dis");
-					//socket.emit('join', mui.currentWebview.meetId + ":" + plus.storage.getItem("nickName"));
-				});
-
-
-				socket.on('serverMessage', function(content) {
-					addMessage(content);
-				});
-
-				function sendCommand(command, args) {
-					if (command === 'j') {
-						socket.emit('join', args);
-					} else {
-						alert('unknown command: ' + command);
-					}
-				}
-
-
-
-				var inputElement = document.getElementById('chatInput');
-				var sendElement = document.getElementById('send');
-
-
-
-				function initVal() {
-					var curUser = plus.storage.getItem('userName');
-					//console.debug(plus.webview.currentWebview().meetId);
-					var data = "meetId=" + plus.webview.currentWebview().meetId;
-					ppXhr(ppUrl + "getChatList", "POST", data,
-						function(result) {
-							if (result.status == "OK") {
-								//document.querySelector('#messages').innerHTML = "";
-								if (result.list) {
-									var list = result.list;
-									list.forEach(function(chat) {
-										var dateStr = dateFromObjectId(chat._id);
-
-										if (chat.from == curUser) {
-											//											var li = '<div class="mui-card mui-pull-left chat">\
-											//													<span>' + chat.content + '</span>\
-											//												</div>';
-											addMessage("我:" + chat.content);
-										} else { //receiver
-											//											var li = '<div class="mui-card mui-pull-right chat">\
-											//													<span>' + chat.content + '</span>\
-											//												</div>';
-											addMessage("TA:" + chat.content);
-										}
-										//document.querySelector('#messages').innerHTML += li;
-									});
-								}
-							} else {
-								alert("失败:" + result.msg.err);
-							}
-						},
-						function(result) {
-							alert("xhr请求失败：" + result.status);
-						}
-					);
-				}
-			});
-		</script>
 		<style>
 			html,
 			body {
@@ -125,18 +41,72 @@
 	<body>
 		<header class="mui-bar mui-bar-nav">
 			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
-			<h1 class="mui-title">对话</h1>
+			<h1 id="title" class="mui-title"></h1>
 		</header>
 		<div class="mui-content">
 			<div class="mui-input-row" style="margin: 10px 5px;">
 				<textarea id="chatInput" rows="3" placeholder="请输入甜言蜜语"></textarea>
-				<button class="mui-btn mui-btn-primary mui-btn-block" style="margin-bottom: 10px;" onclick="ff();">发送</button>
+				<button class="mui-btn mui-btn-primary mui-btn-block" style="margin-bottom: 10px;" onclick="checkMsg();">发送</button>
 			</div>
 			<div id="messages">
 			</div>
 
 
 		</div>
+		<script type="text/javascript" charset="utf-8">
+			var friendUserName = null;
+			mui.init();
+			mui.plusReady(function() {
+				friendUserName = plus.webview.currentWebview().friendUserName;
+				console.log(friendUserName);
+				document.getElementById('title').innerHTML = friendUserName;
+				initVal();
+
+				var inputElement = document.getElementById('chatInput');
+				var sendElement = document.getElementById('send');
+
+
+
+				function initVal() {
+					var curUser = plus.storage.getItem('userName');
+					//console.debug(plus.webview.currentWebview().meetId);
+					var data = "friendUserName=" + friendUserName;
+					data += "&userName=" + curUser;
+					ppXhr(ppUrl + "getChatList", "POST", data,
+						function(result) {
+							if (result.status == "OK") {
+								//document.querySelector('#messages').innerHTML = "";
+								if (result.list) {
+									var list = result.list;
+									list.forEach(function(chat) {
+										//console.log(chat.content);
+										var dateStr = dateFromObjectId(chat._id);
+
+										if (chat.from == curUser) {
+											//											var li = '<div class="mui-card mui-pull-left chat">\
+											//													<span>' + chat.content + '</span>\
+											//												</div>';
+											addMessage("我:" + chat.content, true);
+										} else { //receiver
+											//											var li = '<div class="mui-card mui-pull-right chat">\
+											//													<span>' + chat.content + '</span>\
+											//												</div>';
+											addMessage("TA:" + chat.content, true);
+										}
+										//document.querySelector('#messages').innerHTML += li;
+									});
+								}
+							} else {
+								alert("失败:" + result.msg.err);
+							}
+						},
+						function(result) {
+							alert("xhr请求失败：" + result.status);
+						}
+					);
+				}
+			});
+		</script>
 		<script type="text/javascript" charset="utf-8">
 			function send() {
 				var content = document.getElementById("chatInput").value;
@@ -171,33 +141,56 @@
 				document.querySelector('#chatList').innerHTML = div + document.querySelector('#chatList').innerHTML;
 			}, false);
 
-			function ff() {
-				sendMessage(document.getElementById('chatInput').value);
-				document.getElementById('chatInput').value = '';
-				return false;
+			window.addEventListener('clientMessageReceived', function(event) {
+				var content = event.detail.content;
+				addMessage("我:" + content);
+			}, false);
+
+			window.addEventListener('serverMessageReceived', function(event) {
+				var content = event.detail.content
+				var from = event.detail.from
+				addMessage(from + ":" + content);
+			}, false);
+
+			function checkMsg() {
+				if (document.getElementById('chatInput').value == '') {
+					alert('请输入内容');
+					return false;
+				} else {
+					sendMessage(document.getElementById('chatInput').value);
+					document.getElementById('chatInput').value = '';
+					return false;
+				}
 
 			};
 
-			function sendMessage(message) {
-				var commandMatch = message.match(/^\/(\w*)(.*)/);
-				if (commandMatch) {
-					sendCommand(commandMatch[1], commandMatch[2].trim());
-				} else {
-					socket.emit('clientMessage', message);
-				}
+			function sendMessage(content) {
+				mui.fire(plus.webview.getWebviewById("contact.html"), 'clientMessage', {
+					from: plus.storage.getItem('userName'),
+					to: friendUserName,
+					content: content
+				});
 			}
 
 			var messagesElement = document.getElementById('messages');
-			var lastMessageElement = null;
+			var firstMessageElement = null;
 
-			function addMessage(message) {
+			function addMessage(message, append) {
 				var newMessageElement = document.createElement('div');
 				var newMessageText = document.createTextNode(message);
 
 				newMessageElement.appendChild(newMessageText);
-				messagesElement.insertBefore(newMessageElement,
-					lastMessageElement);
-				lastMessageElement = newMessageElement;
+
+				if (append) {
+					if (firstMessageElement == null) {
+						firstMessageElement = newMessageElement;
+					}
+					messagesElement.appendChild(newMessageElement);
+				} else {
+					messagesElement.insertBefore(newMessageElement,
+						firstMessageElement);
+					firstMessageElement = newMessageElement;
+				}
 			}
 		</script>
 	</body>

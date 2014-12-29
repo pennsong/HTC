@@ -56,7 +56,7 @@
 	 * @param {boolean} ns : 是否不自动显示
 	 * @param {json} extras : 参数列表
 	 */
-	w.clicked = function(id, wa, ns, extras, aniShow, meetId) {
+	w.clicked = function(id, wa, ns, extras, aniShow, specialId) {
 		if (openw) { //避免多次打开同一个页面
 			return null;
 		}
@@ -64,8 +64,8 @@
 			wa && (waiting = plus.nativeUI.showWaiting());
 			var pre = ''; //'http://192.168.1.178:8080/h5/';
 			var pageId = id;
-			if (meetId) {
-				pageId += meetId;
+			if (specialId) {
+				pageId += specialId;
 			}
 			openw = plus.webview.create(pre + id, pageId, {
 				scrollIndicator: 'none',
@@ -193,9 +193,9 @@
 	//add by pp
 	//w.ppUrl = "http://inner.channelwin.info:3000/";
 	//w.ppSocketUrl = "http://inner.channelwin.info:4000/";
-	
+
 	w.ppUrl = "http://192.168.1.9:3000/";
-	//w.ppSocketUrl = "http://10.0.1.6:4000/";
+	//w.ppUrl = "http://10.0.1.6:3000/";
 
 	w.ppXhr = function(url, methord, param, successFn, failFn) {
 		var xhr = new plus.net.XMLHttpRequest();
@@ -286,11 +286,8 @@
 	String.prototype.splice = function(idx, s) {
 		return (this.slice(0, idx) + s + this.slice(idx));
 	};
-	
-	w.getSizeImage = function(imageSource, extra){
+
+	w.getSizeImage = function(imageSource, extra) {
 		return imageSource.splice(imageSource.lastIndexOf('.'), extra);
 	}
-	
-
-
 })(window);
