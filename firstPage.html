@@ -8,7 +8,8 @@
 		<script src="js/mui.min.js"></script>
 		<link href="css/mui.min.css" rel="stylesheet" />
 		<script src="js/common.js"></script>
-		<script src="http://192.168.1.9:3000/socket.io/socket.io.js"></script>
+		<!--<script src="http://192.168.1.9:3000/socket.io/socket.io.js"></script>-->
+		<script src="http://www.channelwin.info:3000/socket.io/socket.io.js"></script>
 		<script>
 			var watchId;
 			var socket = null;
@@ -67,6 +68,35 @@
 					//					coordsType: "bd09ll"
 				});
 			}
+
+			function searchTarget() {
+				var data = "userName=" + plus.storage.getItem('userName');
+				ppXhr(ppUrl + "getInfo", "POST", data,
+					function(result) {
+						if (result.status == "OK") {
+							var info = result.item;
+							console.log(info);
+							if (info == null) {
+								plus.nativeUI.alert("请先填写个人特征信息!", function() {
+									inputInfo();
+								}, "提示", "是啊, 这怎么能忘!");
+							} else {
+								clicked('meetDefine.html', null, null, null, 'pop-in');
+							}
+						} else {
+							alert("失败:" + result.msg.err);
+						}
+					},
+					function(result) {
+						alert("xhr请求失败：" + result.status);
+					}
+				);
+			}
+			
+			function inputInfo()
+			{
+				clicked('info.html', null, null, null, 'pop-in');
+			}
 		</script>
 		<style>
 			html,
@@ -78,8 +108,8 @@
 
 	<body>
 		<header class="mui-bar mui-bar-nav">
-			<a class="mui-icon mui-icon-plusempty mui-pull-left" onclick="clicked('meetDefine.html', null, null, null, 'pop-in')"></a>
-			<a class="mui-icon mui-icon-person mui-pull-right" onclick="clicked('info.html', null, null, null, 'pop-in')"></a>
+			<a class="mui-icon mui-icon-plusempty mui-pull-left" onclick="searchTarget()"></a>
+			<a class="mui-icon mui-icon-person mui-pull-right" onclick="inputInfo()"></a>
 			<h1 class="mui-title" id="title">嗨羞-首页</h1>
 		</header>
 		<div class="mui-content">
@@ -133,14 +163,14 @@
 					plus.device.vibrate();
 					var pageObj = plus.webview.getWebviewById("chat.html" + msg.from);
 					console.log("chat.html" + msg.from);
-					if (pageObj != null) {//chat页面打开
+					if (pageObj != null) { //chat页面打开
 						fn(true);
 						mui.fire(pageObj, 'serverMessageReceived', msg);
 					} else {
 						mui.fire(plus.webview.getWebviewById("contact.html"), 'newMsg', {
 							friendUserName: msg.from
 						});
-						if (activeTab != "contact.html")//不是当前页面
+						if (activeTab != "contact.html") //不是当前页面
 						{
 							document.getElementById('contactNew').style.display = 'inline';
 						}
@@ -161,7 +191,7 @@
 					var formattedMsg = msg.content;
 					formattedMsg = "{" + formattedMsg + "}";
 					try {
-						console.debug(formattedMsg);
+						console.debug("" + formattedMsg);
 						//在这里运行代码
 						var msgJson = JSON.parse(formattedMsg);
 					} catch (err) {
@@ -183,6 +213,7 @@
 							meetId: msgJson.meetId
 						});
 						mui.fire(plus.webview.getWebviewById("contact.html"), 'matchTarget', {
+							friendUserName: msgJson.friend,
 							meetId: msgJson.meetId
 						});
 					} else if (msgJson.type == 'matchCreater') {
@@ -193,6 +224,7 @@
 							meetId: msgJson.meetId
 						});
 						mui.fire(plus.webview.getWebviewById("contact.html"), 'matchCreater', {
+							friendUserName: msgJson.friend,
 							meetId: msgJson.meetId
 						});
 					} else if (msgJson.type == "invite") {

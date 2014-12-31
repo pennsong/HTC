@@ -14,6 +14,14 @@
 				initVal();
 			});
 
+			function checkInput() {
+				if (getRadioVal("hair") && getRadioVal("glasses") && getRadioVal("clothesType") && getRadioVal("clothesColor") && getRadioVal("clothesStyle") && document.getElementById("fileName").value) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+
 			function initVal() {
 				var data = "userName=" + plus.storage.getItem('userName');
 				ppXhr(ppUrl + "getInfo", "POST", data,
@@ -38,27 +46,32 @@
 			}
 
 			mui.back = function() {
-				var data = "userName=" + plus.storage.getItem('userName');
-				data += "&hair=" + getRadioVal("hair");
-				data += "&glasses=" + getRadioVal("glasses");
-				data += "&clothesType=" + getRadioVal("clothesType");
-				data += "&clothesColor=" + getRadioVal("clothesColor");
-				data += "&clothesStyle=" + getRadioVal("clothesStyle");
-				data += "&fileName=" + document.getElementById("fileName").value;
-				console.debug("a:" + document.getElementById("fileName").value);
-				ppXhr(ppUrl + "updateInfo", "POST", data,
-					function(result) {
-						if (result.status == "OK") {
+				if (checkInput()) {
+					var data = "userName=" + plus.storage.getItem('userName');
+					data += "&hair=" + getRadioVal("hair");
+					data += "&glasses=" + getRadioVal("glasses");
+					data += "&clothesType=" + getRadioVal("clothesType");
+					data += "&clothesColor=" + getRadioVal("clothesColor");
+					data += "&clothesStyle=" + getRadioVal("clothesStyle");
+					data += "&fileName=" + document.getElementById("fileName").value;
+					//console.debug("a:" + document.getElementById("fileName").value);
+					ppXhr(ppUrl + "updateInfo", "POST", data,
+						function(result) {
+							if (result.status == "OK") {
+								mui.currentWebview.close();
+							} else {
+								alert("失败:" + result.msg.err);
+							}
+						},
+						function(result) {
+							alert("xhr请求失败：" + result.status);
 							mui.currentWebview.close();
-						} else {
-							alert("失败:" + result.msg.err);
 						}
-					},
-					function(result) {
-						alert("xhr请求失败：" + result.status);
-						mui.currentWebview.close();
-					}
-				);
+					);
+				} else {
+					plus.nativeUI.alert("请填写完整!", function() {
+					}, "错误", "明白!");
+				}
 			}
 
 			function getImage() {

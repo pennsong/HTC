@@ -25,19 +25,40 @@
 					plus.webview.close(plus.webview.getWebviewById('specialPic2.html'));
 					mui.currentWebview.close();
 				} else {
-					var data = "meetId=" + plus.storage.getItem('xiehouMeetId');
-					data += "&userName=" + plus.webview.currentWebview().userName;
-
-					ppXhr(ppUrl + "updateMeet", "POST", data,
+					//在现有朋友中查找是否存在
+					var data = "userName=" + plus.storage.getItem('userName');
+					data += "&friendUserName=" + mui.currentWebview.userName;
+					ppXhr(ppUrl + "checkFriendExist", "POST", data,
 						function(result) {
-							mui.fire(plus.webview.getWebviewById("meet.html"), 'xiehouUpdate', {
-								data: result.item
-							});
-							plus.webview.close(plus.webview.getWebviewById('specialPic2.html'));
-							mui.currentWebview.close();
+							if (result.status == "OK") {
+								var info = result.list;
+								if (info.length == 0) {
+									var data = "meetId=" + plus.storage.getItem('xiehouMeetId');
+									data += "&userName=" + plus.webview.currentWebview().userName;
+
+									ppXhr(ppUrl + "updateMeet", "POST", data,
+										function(result) {
+											mui.fire(plus.webview.getWebviewById("meet.html"), 'xiehouUpdate', {
+												data: result.item
+											});
+											plus.webview.close(plus.webview.getWebviewById('specialPic2.html'));
+											mui.currentWebview.close();
+										},
+										function(xhr) {
+											alert("xhr请求失败：" + xhr.status);
+										}
+									);
+								} else {
+									plus.nativeUI.alert("这个人已经是你朋友啦!", function() {
+										mui.currentWebview.close();
+									}, "提示", "是啊, 让我赶快行动!");
+								}
+							} else {
+								alert("失败:" + result.msg.err);
+							}
 						},
-						function(xhr) {
-							alert("xhr请求失败：" + xhr.status);
+						function(result) {
+							alert("xhr请求失败：" + result.status);
 						}
 					);
 				}

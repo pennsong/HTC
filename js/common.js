@@ -191,9 +191,9 @@
 	};
 
 	//add by pp
-	//w.ppUrl = "http://inner.channelwin.info:3000/";
+	w.ppUrl = "http://inner.channelwin.info:3000/";
 
-	w.ppUrl = "http://192.168.1.9:3000/";
+	//w.ppUrl = "http://192.168.1.9:3000/";
 	//w.ppUrl = "http://10.0.1.6:3000/";
 
 	w.ppXhr = function(url, methord, param, successFn, failFn) {

@@ -13,23 +13,35 @@
 			mui.plusReady(function() {});
 
 			function searchTarget() {
-				plus.storage.setItem('xiehouUid', document.getElementById('locUid').value);
-				plus.storage.setItem('xiehouSex', getRadioVal("sex"));
-				plus.storage.setItem('xiehouHair', getRadioVal("hair"));
-				plus.storage.setItem('xiehouGlasses', getRadioVal("glasses"));
-				plus.storage.setItem('xiehouClothesType', getRadioVal("clothesType"));
-				plus.storage.setItem('xiehouClothesColor', getRadioVal("clothesColor"));
-				plus.storage.setItem('xiehouClothesStyle', getRadioVal("clothesStyle"));
-				clicked('specialPic.html');
+				if (checkInput()) {
+					plus.storage.setItem('xiehouUid', document.getElementById('locUid').value);
+					plus.storage.setItem('xiehouSex', getRadioVal("sex"));
+					plus.storage.setItem('xiehouHair', getRadioVal("hair"));
+					plus.storage.setItem('xiehouGlasses', getRadioVal("glasses"));
+					plus.storage.setItem('xiehouClothesType', getRadioVal("clothesType"));
+					plus.storage.setItem('xiehouClothesColor', getRadioVal("clothesColor"));
+					plus.storage.setItem('xiehouClothesStyle', getRadioVal("clothesStyle"));
+					clicked('specialPic.html');
+				} else {
+					plus.nativeUI.alert("请填写完整!", function() {}, "错误", "明白!");
+				}
 			}
-			
+
+			function checkInput() {
+				if (document.getElementById('locUid').value && getRadioVal("sex") && getRadioVal("hair") && getRadioVal("glasses") && getRadioVal("clothesType") && getRadioVal("clothesColor") && getRadioVal("clothesStyle")) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+
 			window.addEventListener('selectLoc', function(event) {
 				var uid = event.detail.uid;
 				var locName = event.detail.locName;
-				
+
 				document.getElementById('locName').innerHTML = locName;
 				document.getElementById('locUid').value = uid;
-				
+
 			}, false);
 		</script>
 	</head>
@@ -48,7 +60,7 @@
 						<a id="locName" class="mui-navigate-right" onclick="clicked('meetLocation.html')">
 					      请选择
 					    </a>
-					    <input type="hidden" id="locUid" />
+						<input type="hidden" id="locUid" />
 					</li>
 				</ul>
 			</div>

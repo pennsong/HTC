@@ -20,22 +20,42 @@
 			}
 
 			function yes() {
-				mui.fire(plus.webview.getWebviewById("meet.html"), 'createXiehou', {
-					userName: mui.currentWebview.userName,
-					fileName: mui.currentWebview.fileName,
-					uid: plus.storage.getItem('xiehouUid'),
-					sex: plus.storage.getItem('xiehouSex'),
-					hair: plus.storage.getItem('xiehouHair'),
-					glasses: plus.storage.getItem('xiehouGlasses'),
-					clothesType: plus.storage.getItem('xiehouClothesType'),
-					clothesColor: plus.storage.getItem('xiehouClothesColor'),
-					clothesStyle: plus.storage.getItem('xiehouClothesStyle')
-				});
+				//在现有朋友中查找是否存在
+				var data = "userName=" + plus.storage.getItem('userName');
+				data += "&friendUserName=" + mui.currentWebview.userName;
+				ppXhr(ppUrl + "checkFriendExist", "POST", data,
+					function(result) {
+						if (result.status == "OK") {
+							var info = result.list;
+							if (info.length == 0) {
+								mui.fire(plus.webview.getWebviewById("meet.html"), 'createXiehou', {
+									userName: mui.currentWebview.userName,
+									fileName: mui.currentWebview.fileName,
+									uid: plus.storage.getItem('xiehouUid'),
+									sex: plus.storage.getItem('xiehouSex'),
+									hair: plus.storage.getItem('xiehouHair'),
+									glasses: plus.storage.getItem('xiehouGlasses'),
+									clothesType: plus.storage.getItem('xiehouClothesType'),
+									clothesColor: plus.storage.getItem('xiehouClothesColor'),
+									clothesStyle: plus.storage.getItem('xiehouClothesStyle')
+								});
 
-				plus.webview.close(plus.webview.getWebviewById('specialPic.html'));
-				plus.webview.close(plus.webview.getWebviewById('meetDefine.html'));
-				mui.currentWebview.close();
-
+								plus.webview.close(plus.webview.getWebviewById('specialPic.html'));
+								plus.webview.close(plus.webview.getWebviewById('meetDefine.html'));
+								mui.currentWebview.close();
+							} else {
+								plus.nativeUI.alert("这个人已经是你朋友啦!", function() {
+									mui.currentWebview.close();
+								}, "提示", "是啊, 让我赶快行动!");
+							}
+						} else {
+							alert("失败:" + result.msg.err);
+						}
+					},
+					function(result) {
+						alert("xhr请求失败：" + result.status);
+					}
+				);
 			}
 		</script>
 	</head>
