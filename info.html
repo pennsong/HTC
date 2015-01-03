@@ -8,121 +8,7 @@
 		<script src="js/mui.min.js"></script>
 		<link href="css/mui.min.css" rel="stylesheet" />
 		<script src="js/common.js"></script>
-		<script type="text/javascript" charset="utf-8">
-			mui.init();
-			mui.plusReady(function() {
-				initVal();
-			});
-
-			function checkInput() {
-				if (getRadioVal("hair") && getRadioVal("glasses") && getRadioVal("clothesType") && getRadioVal("clothesColor") && getRadioVal("clothesStyle") && document.getElementById("fileName").value) {
-					return true;
-				} else {
-					return false;
-				}
-			}
-
-			function initVal() {
-				var data = "userName=" + plus.storage.getItem('userName');
-				ppXhr(ppUrl + "getInfo", "POST", data,
-					function(result) {
-						if (result.status == "OK") {
-							var info = result.item;
-							setRadioVal('hair', info.hair);
-							setRadioVal('glasses', info.glasses);
-							setRadioVal('clothesType', info.clothesType);
-							setRadioVal('clothesColor', info.clothesColor);
-							setRadioVal('clothesStyle', info.clothesStyle);
-							document.querySelector('#pic').setAttribute("src", ppUrl + "images/" + getSizeImage(info.fileName, "_m"));
-							document.querySelector('#fileName').value = info.fileName;
-						} else {
-							alert("失败:" + result.msg.err);
-						}
-					},
-					function(result) {
-						alert("xhr请求失败：" + result.status);
-					}
-				);
-			}
-
-			mui.back = function() {
-				if (checkInput()) {
-					var data = "userName=" + plus.storage.getItem('userName');
-					data += "&hair=" + getRadioVal("hair");
-					data += "&glasses=" + getRadioVal("glasses");
-					data += "&clothesType=" + getRadioVal("clothesType");
-					data += "&clothesColor=" + getRadioVal("clothesColor");
-					data += "&clothesStyle=" + getRadioVal("clothesStyle");
-					data += "&fileName=" + document.getElementById("fileName").value;
-					//console.debug("a:" + document.getElementById("fileName").value);
-					ppXhr(ppUrl + "updateInfo", "POST", data,
-						function(result) {
-							if (result.status == "OK") {
-								mui.currentWebview.close();
-							} else {
-								alert("失败:" + result.msg.err);
-							}
-						},
-						function(result) {
-							alert("xhr请求失败：" + result.status);
-							mui.currentWebview.close();
-						}
-					);
-				} else {
-					plus.nativeUI.alert("请填写完整!", function() {
-					}, "错误", "明白!");
-				}
-			}
-
-			function getImage() {
-				var cmr = plus.camera.getCamera();
-				cmr.captureImage(function(p) {
-					upload(p)
-					plus.io.resolveLocalFileSystemURL(p, function(entry) {
-						createItem(entry);
-
-					}, function(e) {
-						outLine("读取拍照文件错误：" + e.message);
-					});
-				}, function(e) {
-					outLine("失败：" + e.message);
-				}, {
-					filename: "_doc/camera/"
-				});
-			}
-
-			function upload(path) {
-				console.log("start upload");
-				var server = ppUrl + "uploadSpecialPic";
-				var wt = plus.nativeUI.showWaiting();
-				var task = plus.uploader.createUpload(server, {
-						method: "POST",
-					},
-					function(t, status) { //上传完成
-						if (status == 200) {
-							var fileName = JSON.parse(t.responseText).item;
-							console.log("上传成功：" + fileName);
-							document.querySelector('#fileName').value = fileName;
-							wt.close();
-						} else {
-							outLine("上传失败：" + status);
-							wt.close();
-						}
-					}
-				);
-				task.addData("client", "pp");
-				task.addFile(path, {
-					key: "specialPic"
-				});
-				console.log("task start");
-				task.start();
-			}
-
-			function createItem(entry) {
-				console.log(entry.fullPath);
-				document.querySelector('#pic').setAttribute("src", entry.fullPath);
-			}
-		</script>
+		<script src="js/load-image.all.min.js"></script>
 	</head>
 
 	<body>
@@ -296,10 +182,347 @@
 				<button class="mui-btn mui-btn-primary mui-btn-block" onclick="getImage();">拍照</button>
 			</div>
 			<div class="mui-input-row" style="margin: 10px 5px">
-				<img id="pic" style="height: 200px; margin-left: auto; margin-right: auto;display:block" class="mui-media-object" />
+				<!--<img id="pic" style="height: 200px; margin-left: auto; margin-right: auto;display:block" class="mui-media-object" />-->
+				<img id="source_image" style="height: 200px; margin-left: auto; margin-right: auto;display:block" class="mui-media-object" />
+				<img id="target_image" style="height: 200px; margin-left: auto; margin-right: auto;display:block" class="mui-media-object" />
+				<img id="megapix" style="height: 200px; margin-left: auto; margin-right: auto;display:block" class="mui-media-object" />
+				<input id="tt" />
+				<textarea id="te"></textarea>
 			</div>
 			<input type="hidden" id="fileName" />
 		</div>
 	</body>
+	<script type="text/javascript" charset="utf-8">
+		var jic = {
+			/**
+			 * Receives an Image Object (can be JPG OR PNG) and returns a new Image Object compressed
+			 * @param {Image} source_img_obj The source Image Object
+			 * @param {Integer} quality The output quality of Image Object
+			 * @param {String} output format. Possible values are jpg and png
+			 * @return {Image} result_image_obj The compressed Image Object
+			 */
+
+			compress: function(source_img_obj, quality, output_format) {
+
+				var mime_type = "image/jpeg";
+				if (typeof output_format !== "undefined" && output_format == "png") {
+					mime_type = "image/png";
+				}
+
+				var cvs = document.createElement('canvas');
+				if (plus.os.name == 'iOS') {
+					cvs.height = source_img_obj.naturalWidth >> 1;
+					cvs.width = source_img_obj.naturalHeight >> 1;
+				} else {
+					cvs.height = source_img_obj.naturalHeight;
+					cvs.width = source_img_obj.naturalWidth;
+				}
+				//cvs.width = 960;
+				//cvs.height = 1280;
+				var ctx = cvs.getContext("2d");
+				//a   ctx.drawImage(source_img_obj, (source_img_obj.naturalWidth-1000)>>1, (source_img_obj.naturalHeight - 1000)>>1, 1000, 1000, 0, 0, 1000, 1000);
+				if (plus.os.name == 'iOS') {
+					ctx.translate(source_img_obj.naturalHeight >> 1, 0);
+					ctx.rotate(90 * Math.PI / 180);
+				}
+				//ctx.drawImage(source_img_obj, 0, 0, 960, 960, 0, 0, 960, 1280);
+				//				ctx.fillStyle = '#8ED6FF';
+				//				ctx.fillRect(0, 0, cvs.width, cvs.height);
+				var tmpWidth;
+				var tmpHeight;
+				if (plus.os.name == 'iOS') {
+					tmpWidth = source_img_obj.naturalWidth >> 1;
+					tmpHeight = source_img_obj.naturalHeight >> 1;
+					if (source_img_obj.naturalHeight > 1280) {
+						tmpHeight = source_img_obj.naturalHeight;
+					}
+				} else {
+					tmpWidth = source_img_obj.naturalWidth;
+					tmpHeight = source_img_obj.naturalHeight;
+				}
+				ctx.drawImage(source_img_obj, 0, 0, source_img_obj.naturalWidth, source_img_obj.naturalHeight, 0, 0, tmpWidth, tmpHeight);
+				//ctx.drawImage(source_img_obj, 0, 0, 960, 1280, 0, 0, 960, 1280);
+				var newImageData = cvs.toDataURL(mime_type, quality / 100);
+				document.getElementById("te").innerHTML = "" + source_img_obj.naturalWidth + "," + source_img_obj.naturalHeight;
+				var result_image_obj = new Image();
+				result_image_obj.src = newImageData;
+				return result_image_obj;
+			},
+
+			/**
+			 * Receives an Image Object and upload it to the server via ajax
+			 * @param {Image} compressed_img_obj The Compressed Image Object
+			 * @param {String} The server side url to send the POST request
+			 * @param {String} file_input_name The name of the input that the server will receive with the file
+			 * @param {String} filename The name of the file that will be sent to the server
+			 * @param {function} successCallback The callback to trigger when the upload is succesful.
+			 * @param {function} (OPTIONAL) errorCallback The callback to trigger when the upload failed.
+			 * @param {function} (OPTIONAL) duringCallback The callback called to be notified about the image's upload progress.
+			 * @param {Object} (OPTIONAL) customHeaders An object representing key-value  properties to inject to the request header.
+			 */
+
+			upload: function(compressed_img_obj, upload_url, file_input_name, filename, successCallback, errorCallback, duringCallback, customHeaders) {
+
+
+				//				var cvs = document.createElement('canvas');
+				//				cvs.width = compressed_img_obj.naturalWidth;
+				//				cvs.height = compressed_img_obj.naturalHeight;
+				//				var ctx = cvs.getContext("2d").drawImage(compressed_img_obj, 0, 0);
+
+				//ADD sendAsBinary compatibilty to older browsers
+				if (XMLHttpRequest.prototype.sendAsBinary === undefined) {
+					XMLHttpRequest.prototype.sendAsBinary = function(string) {
+						var bytes = Array.prototype.map.call(string, function(c) {
+							return c.charCodeAt(0) & 0xff;
+						});
+						this.send(new Uint8Array(bytes).buffer);
+					};
+				}
+
+				var type = "image/jpeg";
+				if (filename.substr(-4) == ".png") {
+					type = "image/png";
+				}
+
+				//var data = cvs.toDataURL(type);
+				data = compressed_img_obj;
+				data = data.replace('data:' + type + ';base64,', '');
+
+				var xhr = new XMLHttpRequest();
+				xhr.open('POST', upload_url, true);
+				var boundary = 'someboundary';
+
+				xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
+
+				// Set custom request headers if customHeaders parameter is provided
+				if (customHeaders && typeof customHeaders === "object") {
+					for (var headerKey in customHeaders) {
+						xhr.setRequestHeader(headerKey, customHeaders[headerKey]);
+					}
+				}
+
+				// If a duringCallback function is set as a parameter, call that to notify about the upload progress
+				if (duringCallback && duringCallback instanceof Function) {
+					xhr.onprogress = function(evt) {
+						if (evt.lengthComputable) {
+							return (evt.loaded / evt.total) * 100;
+						}
+					};
+				}
+
+				xhr.sendAsBinary(['--' + boundary, 'Content-Disposition: form-data; name="' + file_input_name + '"; filename="' + filename + '"', 'Content-Type: ' + type, '', atob(data), '--' + boundary + '--'].join('\r\n'));
+
+				xhr.onreadystatechange = function() {
+					if (this.readyState == 4) {
+						if (this.status == 200) {
+							successCallback(this.responseText);
+						} else if (this.status >= 400) {
+							if (errorCallback && errorCallback instanceof Function) {
+								errorCallback(this.responseText);
+							}
+						}
+					}
+				};
+
+
+			}
+		};
+
+		mui.init();
+		mui.plusReady(function() {
+			initVal();
+		});
+
+		function checkInput() {
+			if (getRadioVal("hair") && getRadioVal("glasses") && getRadioVal("clothesType") && getRadioVal("clothesColor") && getRadioVal("clothesStyle") && document.getElementById("fileName").value) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		function initVal() {
+			var data = "userName=" + plus.storage.getItem('userName');
+			ppXhr(ppUrl + "getInfo", "POST", data,
+				function(result) {
+					if (result.status == "OK") {
+						var info = result.item;
+						setRadioVal('hair', info.hair);
+						setRadioVal('glasses', info.glasses);
+						setRadioVal('clothesType', info.clothesType);
+						setRadioVal('clothesColor', info.clothesColor);
+						setRadioVal('clothesStyle', info.clothesStyle);
+						document.querySelector('#pic').setAttribute("src", ppUrl + "images/" + getSizeImage(info.fileName, "_m"));
+						document.querySelector('#fileName').value = info.fileName;
+					} else {
+						alert("失败:" + result.msg.err);
+					}
+				},
+				function(result) {
+					alert("xhr请求失败：" + result.status);
+				}
+			);
+		}
+
+		mui.back = function() {
+			if (checkInput()) {
+				var data = "userName=" + plus.storage.getItem('userName');
+				data += "&hair=" + getRadioVal("hair");
+				data += "&glasses=" + getRadioVal("glasses");
+				data += "&clothesType=" + getRadioVal("clothesType");
+				data += "&clothesColor=" + getRadioVal("clothesColor");
+				data += "&clothesStyle=" + getRadioVal("clothesStyle");
+				data += "&fileName=" + document.getElementById("fileName").value;
+				//console.debug("a:" + document.getElementById("fileName").value);
+				ppXhr(ppUrl + "updateInfo", "POST", data,
+					function(result) {
+						if (result.status == "OK") {
+							mui.currentWebview.close();
+						} else {
+							alert("失败:" + result.msg.err);
+						}
+					},
+					function(result) {
+						alert("xhr请求失败：" + result.status);
+						mui.currentWebview.close();
+					}
+				);
+			} else {
+				plus.nativeUI.alert("请填写完整!", function() {}, "错误", "明白!");
+			}
+		}
+
+		function getImage() {
+			var cmr = plus.camera.getCamera();
+
+			cmr.captureImage(function(p) {
+				//				loadImage(
+				//					p,
+				//					function(img) {
+				//						console.log("dddddddddd");
+				//						var i = document.getElementById("source_image");
+				//						i.src = img.target.src;
+				//					}, {
+				//						maxWidth: 600
+				//					} // Options
+				//				);
+				plus.io.resolveLocalFileSystemURL(
+					p,
+					function(entry) {
+						loadImage(
+							entry.fullPath,
+							function(img) {
+								var i = document.getElementById("source_image");
+								i.src = img.src;
+								//																var scaledImage = loadImage.scale(
+								//																	img, // img or canvas element
+								//																	{
+								//																		maxWidth: 600
+								//																	}
+								//																);
+								//								//
+								//																document.body.appendChild(scaledImage);
+								var pt = document.getElementById("target_image")
+								pt.src = jic.compress(img, 10, 'jpg').src;
+								jic.upload(pt.src, ppUrl + "uploadSpecialPic", "specialPic", "tt.jpg", function(response) {
+									alert(response);
+								});
+							}, {
+								maxWidth: 600
+							} // Options
+						);
+						//						var reader = null;
+						//						entry.file(function(file) {
+						//
+						//							reader = new plus.io.FileReader();
+						//							reader.onloadend = function(event) {
+						//								var i = document.getElementById("source_image");
+						//								var mpCanvas = document.getElementById('megapix');
+						//								i.src = event.target.result;
+						//								i.onload = function() {
+						//									//									i.style.width = "320px";
+						//									//									i.style.height = "300px";
+						//									//									i.style.display = "block";
+						//									//									console.log("Image loaded");
+						//									//									var mpImg = new MegaPixImage(i);
+						//									//									mpImg.render(mpCanvas, {
+						//									//										width: 500,
+						//									//										height: 500
+						//									//									});
+						//									//									console.log(i.width);
+						////									var mpImg = new MegaPixImage(i);
+						////									mpImg.render(mpCanvas, {
+						////										width: i.width,
+						////										height: i.height
+						////									});
+						//									document.getElementById("target_image").src = jic.compress(scaledImage, 10, 'jpg').src;
+						////									var callback = function(response) {
+						////											alert(response);
+						////										}
+						//										//jic.upload(i, ppUrl + "uploadSpecialPic", "specialPic", "tt.jpg", callback);
+						//
+						//
+						//								}
+						//							};
+						//							reader.readAsDataURL(file);
+						//						}, function(e) {
+						//							alert(e.message);
+						//						});
+
+
+
+					},
+					function(e) {
+						console.log("读取拍照文件错误：" + e.message);
+					}
+				);
+
+				//upload(p);
+				//					plus.io.resolveLocalFileSystemURL(p, function(entry) {
+				//						createItem(entry);
+				//
+				//					}, function(e) {
+				//						outLine("读取拍照文件错误：" + e.message);
+				//					});
+			}, function(e) {
+				console.log("失败：" + e.message);
+			}, {
+				filename: "_doc/camera/",
+				index: 2
+			});
+		}
+
+		function upload(path) {
+			console.log("start upload");
+			var server = ppUrl + "uploadSpecialPic";
+			var wt = plus.nativeUI.showWaiting();
+			var task = plus.uploader.createUpload(server, {
+					method: "POST",
+				},
+				function(t, status) { //上传完成
+					if (status == 200) {
+						var fileName = JSON.parse(t.responseText).item;
+						console.log("上传成功：" + fileName);
+						document.querySelector('#fileName').value = fileName;
+						wt.close();
+					} else {
+						outLine("上传失败：" + status);
+						wt.close();
+					}
+				}
+			);
+			task.addData("client", "pp");
+			task.addFile(path, {
+				key: "specialPic"
+			});
+			console.log("task start");
+			task.start();
+		}
+
+		function createItem(entry) {
+			console.log(entry.fullPath);
+			document.querySelector('#pic').setAttribute("src", entry.fullPath);
+		}
+	</script>
 
 </html>
