@@ -57,8 +57,9 @@
 									var li = '<li id="_' + meet.target + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
 									<span class="mui-badge mui-badge-danger chatNew" style="display:none">新</span>\
 										<a href="#">\
-										<span class="mui-icon mui-icon-paperplane"></span>\
+										<img src="' + ppUrl + 'images\\' + getSizeImage(meet.targetPic, "_s") + '" />\
 										' + meet.target + '\
+										<span class="mui-icon mui-icon-paperplane"></span>\
 										<p class="mui-ellipsis">' + dateStr + '</p>\
 										</a>\
 										</li>';
@@ -68,8 +69,9 @@
 									var li = '<li id="_' + meet.creater + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
 									<span class="mui-badge mui-badge-danger chatNew" style="display:none">新</span>\
 										<a href="#">\
-										<span class="mui-icon mui-icon-email"></span>\
+										<img src="' + ppUrl + 'images\\' + getSizeImage(meet.createrPic, "_s") + '" />\
 										' + meet.creater + '\
+										<span class="mui-icon mui-icon-email"></span>\
 										<p class="mui-ellipsis">' + dateStr + '</p>\
 										</a>\
 										</li>';
@@ -95,6 +97,7 @@
 			window.addEventListener('matchTarget', function(event) {
 				var friendUserName = event.detail.friendUserName;
 				var meetId = event.detail.meetId;
+				var pic = event.detail.pic;
 				//add to page list
 				var paramJsonStr = "{friendUserName:'" + friendUserName + "'}";
 				var fnStr = "onclick=clicked2('chat.html',null,null," + paramJsonStr + ",null,'" + friendUserName + "')";
@@ -102,8 +105,9 @@
 				var li = '<li id="_' + friendUserName + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
 				<span class="mui-badge mui-badge-danger chatNew" style="display:none">新</span>\
 							<a href="#">\
-							<span class="mui-icon mui-icon-email"></span>\
+							<img src="' + ppUrl + 'images\\' + getSizeImage(pic, "_s") + '" />\
 							<span class="status">' + friendUserName + '</span>\
+							<span class="mui-icon mui-icon-email"></span>\
 							<p class="mui-ellipsis">' + formatDateFromObjectId(meetId) + '</p>\
 							</a>\
 							</li>';
@@ -113,6 +117,7 @@
 			window.addEventListener('matchCreater', function(event) {
 				var friendUserName = event.detail.friendUserName;
 				var meetId = event.detail.meetId;
+				var pic = event.detail.pic;
 				//add to page list
 				var paramJsonStr = "{friendUserName:'" + friendUserName + "'}";
 				var fnStr = "onclick=clicked2('chat.html',null,null," + paramJsonStr + ",null,'" + friendUserName + "')";
@@ -120,8 +125,9 @@
 				var li = '<li id="_' + friendUserName + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
 				<span class="mui-badge mui-badge-danger chatNew" style="display:none">新</span>\
 							<a href="#">\
-							<span class="mui-icon mui-icon-paperplane"></span>\
+							<img src="' + ppUrl + 'images\\' + getSizeImage(pic, "_s") + '" />\
 							<span class="status">' + friendUserName + '</span>\
+							<span class="mui-icon mui-icon-paperplane"></span>\
 							<p class="mui-ellipsis">' + formatDateFromObjectId(meetId) + '</p>\
 							</a>\
 							</li>';

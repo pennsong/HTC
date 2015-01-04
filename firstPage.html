@@ -214,7 +214,8 @@
 						});
 						mui.fire(plus.webview.getWebviewById("contact.html"), 'matchTarget', {
 							friendUserName: msgJson.friend,
-							meetId: msgJson.meetId
+							meetId: msgJson.meetId,
+							pic: msgJson.pic
 						});
 					} else if (msgJson.type == 'matchCreater') {
 						if (activeTab != "contact.html") {
@@ -225,7 +226,8 @@
 						});
 						mui.fire(plus.webview.getWebviewById("contact.html"), 'matchCreater', {
 							friendUserName: msgJson.friend,
-							meetId: msgJson.meetId
+							meetId: msgJson.meetId,
+							pic: msgJson.pic
 						});
 					} else if (msgJson.type == "invite") {
 						if (activeTab != "meet.html") {
