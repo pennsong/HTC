@@ -8,7 +8,8 @@
 		<script src="js/mui.min.js"></script>
 		<link href="css/mui.min.css" rel="stylesheet" />
 		<script src="js/common.js"></script>
-		<script src="http://192.168.1.9:3000/socket.io/socket.io.js"></script>
+		<!--<script src="http://10.0.1.5:3000/socket.io/socket.io.js"></script>-->
+		<script src="http://192.168.1.6:3000/socket.io/socket.io.js"></script>
 		<!--<script src="http://inner.channelwin.info:3000/socket.io/socket.io.js"></script>-->
 		<script>
 			var watchId;
@@ -92,9 +93,9 @@
 					}
 				);
 			}
-			
-			function inputInfo()
-			{
+
+			function inputInfo() {
+				document.getElementById('updateInfo').style.display = 'none';
 				clicked('info.html', null, null, null, 'pop-in');
 			}
 		</script>
@@ -109,7 +110,7 @@
 	<body>
 		<header class="mui-bar mui-bar-nav">
 			<a class="mui-icon mui-icon-plusempty mui-pull-left" onclick="searchTarget()"></a>
-			<a class="mui-icon mui-icon-person mui-pull-right" onclick="inputInfo()"></a>
+			<a class="mui-icon mui-icon-person mui-pull-right" onclick="inputInfo()"><span id="updateInfo" class="mui-badge mui-badge-danger" style="display:none">!</span></a>
 			<h1 class="mui-title" id="title">嗨羞-首页</h1>
 		</header>
 		<div class="mui-content">
@@ -202,9 +203,11 @@
 
 					//jQuery("#pp").html(msgJson.type);
 					if (msgJson.type == 'checkNewXiehouPic') {
-						//jQuery("#" + msgJson.xiehouId).addClass("unread");
+						mui.fire(plus.webview.getWebviewById("meet.html"), 'checkNewXiehouPic', {
+							meetId: msgJson.meetId
+						});
 					} else if (msgJson.type == 'checkInfo') {
-						//jQuery("#checkInfo").show();
+						document.getElementById('updateInfo').style.display = 'inline';
 					} else if (msgJson.type == 'matchTarget') {
 						if (activeTab != "contact.html") {
 							document.getElementById('contactNew').style.display = 'inline';

@@ -7,6 +7,11 @@
 		<title></title>
 		<script src="js/mui.min.js"></script>
 		<link href="css/mui.min.css" rel="stylesheet" />
+		<style>
+			.unread{
+				background: blue;
+			}
+		</style>
 		<script src="js/common.js"></script>
 		<script type="text/javascript" charset="utf-8">
 			mui.init({
@@ -166,6 +171,7 @@
 			}
 
 			function clickXiehou(pageId, meetId, fileName) {
+				removeClass(document.getElementById('_' + meetId), "unread");
 				var data = "meetId=" + meetId;
 
 				ppXhr(ppUrl + "getMeet", "POST", data,
@@ -247,6 +253,11 @@
 				var meetId = event.detail.meetId;
 				//removeOldSentXiehou
 				document.getElementById('_' + meetId).remove();
+			}, false);
+			
+			window.addEventListener('checkNewXiehouPic', function(event) {
+				var meetId = event.detail.meetId;
+				addClass(document.getElementById('_' + meetId), "unread");
 			}, false);
 
 			window.addEventListener('xiehouUpdate', function(event) {

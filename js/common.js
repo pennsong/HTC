@@ -191,10 +191,10 @@
 	};
 
 	//add by pp
-//	w.ppUrl = "http://inner.channelwin.info:3000/";
+	//w.ppUrl = "http://inner.channelwin.info:3000/";
 
-	w.ppUrl = "http://192.168.1.9:3000/";
-	//w.ppUrl = "http://10.0.1.6:3000/";
+	w.ppUrl = "http://192.168.1.6:3000/";
+	//	w.ppUrl = "http://10.0.1.5:3000/";
 
 	w.ppXhr = function(url, methord, param, successFn, failFn) {
 		var xhr = new plus.net.XMLHttpRequest();
@@ -289,6 +289,19 @@
 	w.getSizeImage = function(imageSource, extra) {
 		return imageSource.splice(imageSource.lastIndexOf('.'), extra);
 	}
-
-	
 })(window);
+
+function hasClass(ele, cls) {
+	return ele.className.match(new RegExp('(\\s|^)' + cls + '(\\s|$)'));
+}
+
+function addClass(ele, cls) {
+	if (!this.hasClass(ele, cls)) ele.className += " " + cls;
+}
+
+function removeClass(ele, cls) {
+	if (hasClass(ele, cls)) {
+		var reg = new RegExp('(\\s|^)' + cls + '(\\s|$)');
+		ele.className = ele.className.replace(reg, ' ');
+	}
+}
