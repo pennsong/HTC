@@ -8,8 +8,8 @@
 		<script src="js/mui.min.js"></script>
 		<link href="css/mui.min.css" rel="stylesheet" />
 		<script src="js/common.js"></script>
-		<!--<script src="http://10.0.1.5:3000/socket.io/socket.io.js"></script>-->
-		<script src="http://192.168.1.6:3000/socket.io/socket.io.js"></script>
+		<script src="http://10.0.1.5:3000/socket.io/socket.io.js"></script>
+		<!--<script src="http://192.168.1.6:3000/socket.io/socket.io.js"></script>-->
 		<!--<script src="http://inner.channelwin.info:3000/socket.io/socket.io.js"></script>-->
 		<script>
 			var watchId;
@@ -200,11 +200,19 @@
 						console.debug("JSON格式错误, 请使用双引号");
 						return;
 					}
-
 					//jQuery("#pp").html(msgJson.type);
 					if (msgJson.type == 'checkNewXiehouPic') {
+						console.log('bb');
+						plus.device.beep(1);
+						plus.device.vibrate();
 						mui.fire(plus.webview.getWebviewById("meet.html"), 'checkNewXiehouPic', {
 							meetId: msgJson.meetId
+						});
+					} else if (msgJson.type == 'delContract') {
+						plus.device.beep(1);
+						plus.device.vibrate();
+						mui.fire(plus.webview.getWebviewById("contact.html"), 'delContract', {
+							friendUserName: msgJson.friendUserName
 						});
 					} else if (msgJson.type == 'checkInfo') {
 						document.getElementById('updateInfo').style.display = 'inline';

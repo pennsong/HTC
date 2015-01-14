@@ -50,15 +50,23 @@
 								var dateStr = formatDateFromObjectId(meet._id);
 								var paramJsonStr = null;
 								var fnStr = null;
+								var createrDisplayName = meet.createrNick ? meet.createrNick : meet.creater;
+								var targetDisplayName = meet.targetNick ? meet.targetNick : meet.target;
 
 								if (meet.creater == curUser) {
 									paramJsonStr = "{friendUserName:'" + meet.target + "'}";
 									fnStr = "onclick=clicked2('chat.html',null,null," + paramJsonStr + ",null,'" + meet.target + "')";
-									var li = '<li id="_' + meet.target + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
-									<span class="mui-badge mui-badge-danger chatNew" style="display:none">新</span>\
-										<a href="#">\
+									var li = '<li id="_' + meet.target + '" ' + "" + ' class="mui-table-view-cell mui-media">\
+									<button style="right:80px" class="mui-btn mui-btn-primary" onclick="rename(\'' + meet._id + '\')">\
+										更名\
+									</button>\
+									<button class="mui-btn mui-btn-negative" onclick="del(\'' + meet._id + '\')">\
+										删除\
+									</button>\
+									<span class="mui-badge mui-badge-danger chatNew" style="display:none; right:200px">新</span>\
+										<a class="mui-col-xs-8" href="#" ' + fnStr + '>\
 										<img src="' + ppUrl + 'images\\' + getSizeImage(meet.targetPic, "_s") + '" />\
-										' + meet.target + '\
+										' + targetDisplayName + '\
 										<span class="mui-icon mui-icon-paperplane"></span>\
 										<p class="mui-ellipsis">' + dateStr + '</p>\
 										</a>\
@@ -66,11 +74,17 @@
 								} else {
 									paramJsonStr = "{friendUserName:'" + meet.creater + "'}";
 									fnStr = "onclick=clicked2('chat.html',null,null," + paramJsonStr + ",null,'" + meet.creater + "')";
-									var li = '<li id="_' + meet.creater + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
-									<span class="mui-badge mui-badge-danger chatNew" style="display:none">新</span>\
-										<a href="#">\
+									var li = '<li id="_' + meet.creater + '" ' + "" + ' class="mui-table-view-cell mui-media">\
+									<button style="right:80px" class="mui-btn mui-btn-primary" onclick="rename(\'' + meet._id + '\')">\
+										更名\
+									</button>\
+									<button class="mui-btn mui-btn-negative" onclick="del(\'' + meet._id + '\')">\
+										删除\
+									</button>\
+									<span class="mui-badge mui-badge-danger chatNew" style="display:none; right:200px">新</span>\
+										<a class="mui-col-xs-8" href="#" ' + fnStr + '>\
 										<img src="' + ppUrl + 'images\\' + getSizeImage(meet.createrPic, "_s") + '" />\
-										' + meet.creater + '\
+										' + createrDisplayName + '\
 										<span class="mui-icon mui-icon-email"></span>\
 										<p class="mui-ellipsis">' + dateStr + '</p>\
 										</a>\
@@ -102,14 +116,23 @@
 				var paramJsonStr = "{friendUserName:'" + friendUserName + "'}";
 				var fnStr = "onclick=clicked2('chat.html',null,null," + paramJsonStr + ",null,'" + friendUserName + "')";
 
-				var li = '<li id="_' + friendUserName + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
-				<span class="mui-badge mui-badge-danger chatNew" style="display:none">新</span>\
-							<a href="#">\
+				var li = '<li id="_' + friendUserName + '" ' + "" + ' class="mui-table-view-cell mui-media">\
+				<button style="right:80px" class="mui-btn mui-btn-primary" onclick="rename(\'' + meet._id + '\')">\
+					更名\
+				</button>\
+				<button class="mui-btn mui-btn-negative" onclick="del(\'' + meetId + '\')">\
+					删除\
+				</button>\
+				<span class="mui-badge mui-badge-danger chatNew" style="display:none; right:200px">新</span>\
+							<a class="mui-col-xs-8" href="#" ' + fnStr + '>\
 							<img src="' + ppUrl + 'images\\' + getSizeImage(pic, "_s") + '" />\
 							<span class="status">' + friendUserName + '</span>\
 							<span class="mui-icon mui-icon-email"></span>\
 							<p class="mui-ellipsis">' + formatDateFromObjectId(meetId) + '</p>\
 							</a>\
+							<button class="mui-btn mui-btn-negative" onclick="del(\'' + meetId + '\')">\
+							删除\
+							</button>\
 							</li>';
 				document.querySelector('#contactList').innerHTML = li + document.querySelector('#contactList').innerHTML;
 			}, false);
@@ -122,14 +145,23 @@
 				var paramJsonStr = "{friendUserName:'" + friendUserName + "'}";
 				var fnStr = "onclick=clicked2('chat.html',null,null," + paramJsonStr + ",null,'" + friendUserName + "')";
 
-				var li = '<li id="_' + friendUserName + '" ' + fnStr + ' class="mui-table-view-cell mui-media">\
-				<span class="mui-badge mui-badge-danger chatNew" style="display:none">新</span>\
-							<a href="#">\
+				var li = '<li id="_' + friendUserName + '" ' + "" + ' class="mui-table-view-cell mui-media">\
+				<button style="right:80px" class="mui-btn mui-btn-primary" onclick="rename(\'' + meet._id + '\')">\
+					更名\
+				</button>\
+				<button class="mui-btn mui-btn-negative" onclick="del(\'' + meetId + '\')">\
+					删除\
+				</button>\
+				<span class="mui-badge mui-badge-danger chatNew" style="display:none; right:200px">新</span>\
+							<a class="mui-col-xs-8" href="#" ' + fnStr + '>\
 							<img src="' + ppUrl + 'images\\' + getSizeImage(pic, "_s") + '" />\
 							<span class="status">' + friendUserName + '</span>\
 							<span class="mui-icon mui-icon-paperplane"></span>\
 							<p class="mui-ellipsis">' + formatDateFromObjectId(meetId) + '</p>\
 							</a>\
+							<button class="mui-btn mui-btn-negative" onclick="del(\'' + meetId + '\')">\
+							删除\
+							</button>\
 							</li>';
 				document.querySelector('#contactList').innerHTML = li + document.querySelector('#contactList').innerHTML;
 			}, false);
@@ -138,6 +170,53 @@
 				var friendUserName = event.detail.friendUserName;
 				document.querySelectorAll('#_' + friendUserName + ' .chatNew')[0].style.display = 'inline';
 			}, false);
+
+			window.addEventListener('delContract', function(event) {
+				var friendUserName = event.detail.friendUserName;
+				document.getElementById('_' + friendUserName).remove();
+			}, false);
+
+			function del(meetId) {
+				var data = "meetId=" + meetId;
+
+				ppXhr(ppUrl + "delContract", "POST", data,
+					function(result) {
+						if (result.status == "OK") {
+							alert('删除成功!');
+						} else {
+							alert('删除失败!');
+						}
+					},
+					function(xhr) {
+						alert("xhr请求失败：" + xhr.status);
+					}
+				);
+			}
+
+			function rename(meetId) {
+				plus.nativeUI.prompt("请输入别名: ", function(e) {
+					console.log(((e.index == 0) ? "OK: " : "Cancel") + e.value);
+					if (e.index == 0) {
+						var data = "meetId=" + meetId;
+						data += "&newName=" + e.value;
+						data += "&userName=" + plus.storage.getItem('userName');
+
+						ppXhr(ppUrl + "rename", "POST", data,
+							function(result) {
+								if (result.status == "OK") {
+									
+									alert('更名成功!');
+								} else {
+									alert('更名失败!');
+								}
+							},
+							function(xhr) {
+								alert("xhr请求失败：" + xhr.status);
+							}
+						);
+					}
+				}, "更名", "新名称", ["好", "算了"]);
+			}
 		</script>
 	</head>
 
