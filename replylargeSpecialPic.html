@@ -20,6 +20,7 @@
 			}
 
 			function yes() {
+				var wt = plus.nativeUI.showWaiting();
 				var lastLocJsonStr = plus.storage.getItem('lastLocation');
 				var lastLoc = JSON.parse(lastLocJsonStr);
 
@@ -57,9 +58,11 @@
 						}
 						plus.webview.close(plus.webview.getWebviewById('replySpecialPic.html'));
 						plus.webview.close(plus.webview.getWebviewById('meetReply.html'));
+						wt.close();
 						mui.currentWebview.close();
 					},
 					function(xhr) {
+						wt.close();
 						alert("xhr请求失败：" + xhr.status);
 					}
 				);

@@ -48,6 +48,7 @@
 			function login() {
 				var data = "userName=" + document.getElementById("userName").value;
 				data += "&password=" + document.getElementById("password").value;
+				data += "&cid=" + plus.push.getClientInfo().clientid;
 				ppXhr(ppUrl + "login", "POST", data,
 					function(result) {
 						if (result.status == "OK") {
