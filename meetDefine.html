@@ -14,6 +14,7 @@
 
 			function searchTarget() {
 				if (checkInput()) {
+					plus.storage.setItem('xiehouLocName', document.getElementById('locName').innerHTML);
 					plus.storage.setItem('xiehouUid', document.getElementById('locUid').value);
 					plus.storage.setItem('xiehouSex', getRadioVal("sex"));
 					plus.storage.setItem('xiehouHair', getRadioVal("hair"));

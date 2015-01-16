@@ -93,7 +93,9 @@
 			function createXiehou(detail) {
 				//case fake
 				//				if (detail.userName == "fake") {
-				//					return;
+				//					plus.nativeUI.alert("嘿嘿，不要瞎选哦，如果找不到那个TA请点击不在其中，系统会帮你通知那些还未填写信息的人", function() {
+				//						return;
+				//					}, "警告", "好吧");
 				//				}
 
 				var lastLocJsonStr = plus.storage.getItem('lastLocation');
@@ -102,14 +104,9 @@
 				var data = "userName=" + plus.storage.getItem('userName');
 				data += "&lng=" + lastLoc.lng;
 				data += "&lat=" + lastLoc.lat;
-				if (detail.userName == "fake") {
-					data += "&target=" + "";
-					data += "&status=" + "待确认";
-					plus.nativeUI.alert("我们已通知TA更新个人信息, 请稍后再试", function() {}, "相信美好的事情即将发生", "好, 再给TA一次机会");
-				} else {
-					data += "&target=" + detail.userName;
-					data += "&status=" + "待回复";
-				}
+				data += "&target=" + detail.userName;
+				data += "&status=" + "待回复";
+				data += "&locName=" + detail.locName;
 				data += "&uid=" + detail.uid;
 				data += "&targetSex=" + detail.sex;
 				data += "&targetClothesColor=" + detail.clothesColor;
@@ -135,6 +132,7 @@
 				data += "&lat=" + lastLoc.lat;
 				data += "&target=" + "";
 				data += "&status=" + "待确认";
+				data += "&locName=" + detail.locName;
 				data += "&uid=" + detail.uid;
 				data += "&targetSex=" + detail.sex;
 				data += "&targetClothesColor=" + detail.clothesColor;

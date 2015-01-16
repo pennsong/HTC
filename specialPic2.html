@@ -8,7 +8,39 @@
 		<script src="js/mui.min.js"></script>
 		<link href="css/mui.min.css" rel="stylesheet" />
 		<script src="js/common.js"></script>
-		<script type="text/javascript" charset="utf-8">
+		
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<button class="mui-btn mui-pull-right" onclick="no()">
+				没找到
+			</button>
+			<h1 class="mui-title">特征图片</h1>
+		</header>
+		<div class="mui-content">
+			<ul class="mui-table-view">
+				<li class="mui-table-view-divider">条件</li>
+				<li class="mui-table-view-cell">性别:<span id="targetSex"></span>
+				</li>
+				<li class="mui-table-view-cell">发型:<span id="targetHair"></span>
+				</li>
+				<li class="mui-table-view-cell">是否带眼镜(不包含墨镜):<span id="targetGlasses"></span>
+				</li>
+				<li class="mui-table-view-cell">衣服类型:<span id="targetClothesType"></span>
+				</li>
+				<li class="mui-table-view-cell">衣服颜色:<span id="targetClothesColor"></span>
+				</li>
+				<li class="mui-table-view-cell">衣服花纹:<span id="targetClothesStyle"></span>
+				</li>
+			</ul>
+			<h5 class="mui-content-padded">特征图片:</h5>
+			<ul class="mui-table-view mui-grid-view" id="picList">
+			</ul>
+		</div>
+	</body>
+<script type="text/javascript" charset="utf-8">
 			mui.init();
 
 			mui.plusReady(function() {
@@ -16,6 +48,14 @@
 			});
 
 			function initVal() {
+				document.getElementById('targetSex').appendChild(document.createTextNode(plus.storage.getItem('xiehouSex')));
+				document.getElementById('targetHair').appendChild(document.createTextNode(plus.storage.getItem('xiehouHair')));
+				document.getElementById('targetGlasses').appendChild(document.createTextNode(plus.storage.getItem('xiehouGlasses')));
+				document.getElementById('targetClothesType').appendChild(document.createTextNode(plus.storage.getItem('xiehouClothesType')));
+				document.getElementById('targetClothesColor').appendChild(document.createTextNode(plus.storage.getItem('xiehouClothesColor')));
+				document.getElementById('targetClothesStyle').appendChild(document.createTextNode(plus.storage.getItem('xiehouClothesStyle')));
+
+
 				var lastLocJsonStr = plus.storage.getItem('lastLocation');
 				plus.storage.setItem('xiehouLoc', lastLocJsonStr);
 				var xiehouLoc = JSON.parse(lastLocJsonStr);
@@ -62,21 +102,4 @@
 				mui.currentWebview.close();
 			}
 		</script>
-	</head>
-
-	<body>
-		<header class="mui-bar mui-bar-nav">
-			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
-			<button class="mui-btn mui-pull-right" onclick="no()">
-				没找到
-			</button>
-			<h1 class="mui-title">特征图片</h1>
-		</header>
-		<div class="mui-content">
-			<h5 class="mui-content-padded">特征图片:</h5>
-			<ul class="mui-table-view mui-grid-view" id="picList">
-			</ul>
-		</div>
-	</body>
-
 </html>
