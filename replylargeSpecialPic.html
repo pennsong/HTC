@@ -46,20 +46,20 @@
 							alert(result.warn);
 						}
 						//如果没有匹配
-						else if (result.item == null) {
-							
-							mui.fire(plus.webview.getWebviewById("meet.html"), 'createXiehou', {
-								userName: mui.currentWebview.userName,
-								fileName: mui.currentWebview.fileName,
-								uid: plus.storage.getItem('meetReplyUid'),
-								sex: plus.storage.getItem('meetReplySex'),
-								hair: plus.storage.getItem('meetReplyHair'),
-								glasses: plus.storage.getItem('xiehouGlasses'),
-								clothesType: plus.storage.getItem('meetReplyClothesType'),
-								clothesColor: plus.storage.getItem('meetReplyClothesColor'),
-								clothesStyle: plus.storage.getItem('meetReplyClothesStyle')
-							});
-						}
+//						else if (result.item == null) {
+//							
+//							mui.fire(plus.webview.getWebviewById("meet.html"), 'createXiehou', {
+//								userName: mui.currentWebview.userName,
+//								fileName: mui.currentWebview.fileName,
+//								uid: plus.storage.getItem('meetReplyUid'),
+//								sex: plus.storage.getItem('meetReplySex'),
+//								hair: plus.storage.getItem('meetReplyHair'),
+//								glasses: plus.storage.getItem('xiehouGlasses'),
+//								clothesType: plus.storage.getItem('meetReplyClothesType'),
+//								clothesColor: plus.storage.getItem('meetReplyClothesColor'),
+//								clothesStyle: plus.storage.getItem('meetReplyClothesStyle')
+//							});
+//						}
 						plus.webview.close(plus.webview.getWebviewById('replySpecialPic.html'));
 						plus.webview.close(plus.webview.getWebviewById('meetReply.html'));
 						wt.close();
