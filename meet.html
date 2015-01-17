@@ -198,26 +198,21 @@
 			}
 
 			function replyXiehou(meetId) {
-				clicked("meetReply.html");
-				plus.storage.setItem('meetReplyMeetId', meetId);
+				var data = "meetId=" + meetId;
 
-				//				ppXhr(ppUrl + "getMeet", "POST", data,
-				//					function(result) {
-				//						var meet = result.item;
-				//						//jQuery("#" + xiehou._id).removeClass("unread");
-				//						plus.storage.setItem('xiehouMeetId', meetId);
-				//						plus.storage.setItem('xiehouSex', getRadioVal("sex"));
-				//						plus.storage.setItem('xiehouHair', getRadioVal("hair"));
-				//						plus.storage.setItem('xiehouGlasses', getRadioVal("glasses"));
-				//						plus.storage.setItem('xiehouClothesType', getRadioVal("clothesType"));
-				//						plus.storage.setItem('xiehouClothesColor', getRadioVal("clothesColor"));
-				//						plus.storage.setItem('xiehouClothesStyle', getRadioVal("clothesStyle"));
-				//						clicked("meetReply.html");
-				//					},
-				//					function(xhr) {
-				//						alert("xhr请求失败：" + xhr.status);
-				//					}
-				//				);
+				ppXhr(ppUrl + "getMeet", "POST", data,
+					function(result) {
+						var meet = result.item;
+						
+						plus.storage.setItem('meetReplyMeetId', meetId);
+						plus.storage.setItem('meetReplyLocName', meet.locName);
+						
+						clicked("meetReply.html");
+					},
+					function(xhr) {
+						alert("xhr请求失败：" + xhr.status);
+					}
+				);
 			}
 
 			function clickXiehouDetail(meetId) {

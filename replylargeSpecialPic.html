@@ -41,8 +41,12 @@
 
 				ppXhr(ppUrl + "replyMeet", "POST", data,
 					function(result) {
+						if (result.warn)
+						{
+							alert(result.warn);
+						}
 						//如果没有匹配
-						if (result.item == null) {
+						else if (result.item == null) {
 							
 							mui.fire(plus.webview.getWebviewById("meet.html"), 'createXiehou', {
 								userName: mui.currentWebview.userName,

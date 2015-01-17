@@ -10,7 +10,9 @@
 		<script src="js/common.js"></script>
 		<script type="text/javascript" charset="utf-8">
 			mui.init();
-			mui.plusReady(function() {});
+			mui.plusReady(function() {
+				document.getElementById('locName').innerHTML = plus.storage.getItem("meetReplyLocName");
+			});
 			
 			function searchTarget(){
 				plus.storage.setItem('meetReplyUid', document.getElementById('locUid').value);
@@ -23,33 +25,33 @@
 				clicked('replySpecialPic.html');
 			}
 			
-			window.addEventListener('selectLoc', function(event) {
-				var uid = event.detail.uid;
-				var locName = event.detail.locName;
-				
-				document.getElementById('locName').innerHTML = locName;
-				document.getElementById('locUid').value = uid;
-				
-				//检查是否回复的是同一个空间的邂逅
-				var data = "meetId=" + plus.storage.getItem('meetReplyMeetId');
-				data += "&uid=" + uid;			
-
-				ppXhr(ppUrl + "checkLocUid", "POST", data,
-					function(result){
-						if (result.match == "YES")
-						{
-							
-						}
-						else
-						{
-							alert('你们不在同一个空间!');
-						}
-					},
-					function(xhr) {
-						alert("xhr请求失败：" + xhr.status);
-					}
-				);
-			}, false);
+//			window.addEventListener('selectLoc', function(event) {
+//				var uid = event.detail.uid;
+//				var locName = event.detail.locName;
+//				
+//				document.getElementById('locName').innerHTML = locName;
+//				document.getElementById('locUid').value = uid;
+//				
+//				//检查是否回复的是同一个空间的邂逅
+//				var data = "meetId=" + plus.storage.getItem('meetReplyMeetId');
+//				data += "&uid=" + uid;			
+//
+//				ppXhr(ppUrl + "checkLocUid", "POST", data,
+//					function(result){
+//						if (result.match == "YES")
+//						{
+//							
+//						}
+//						else
+//						{
+//							alert('你们不在同一个空间!');
+//						}
+//					},
+//					function(xhr) {
+//						alert("xhr请求失败：" + xhr.status);
+//					}
+//				);
+//			}, false);
 		</script>
 	</head>
 
@@ -63,8 +65,7 @@
 			<div class="mui-card">
 				<ul class="mui-table-view">
 					<li class="mui-table-view-cell">
-						<a id="locName" class="mui-navigate-right" onclick="clicked('meetLocationReply.html')">
-					      请选择
+						<a id="locName" class="mui-navigate-right">
 					    </a>
 					    <input type="hidden" id="locUid" />
 					</li>

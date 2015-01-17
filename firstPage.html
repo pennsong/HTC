@@ -76,8 +76,7 @@
 					function(result) {
 						if (result.status == "OK") {
 							if (result.warn) {
-								plus.nativeUI.alert("离下次发送邀请还有" + result.warn + "分钟!", function() {
-								}, "提示", "我忍!");
+								plus.nativeUI.alert("离下次发送邀请还有" + result.warn + "分钟!", function() {}, "提示", "我忍!");
 							} else {
 								var info = result.item;
 								console.log(info);
@@ -207,7 +206,6 @@
 					}
 					//jQuery("#pp").html(msgJson.type);
 					if (msgJson.type == 'checkNewXiehouPic') {
-						console.log('bb');
 						plus.device.beep(1);
 						plus.device.vibrate();
 						mui.fire(plus.webview.getWebviewById("meet.html"), 'checkNewXiehouPic', {
@@ -220,7 +218,10 @@
 							friendUserName: msgJson.friendUserName
 						});
 					} else if (msgJson.type == 'checkInfo') {
-						document.getElementById('updateInfo').style.display = 'inline';
+						//如果当前不在info页面
+						if (plus.webview.getWebviewById("info.html") == null) {
+							document.getElementById('updateInfo').style.display = 'inline';
+						}
 					} else if (msgJson.type == 'matchTarget') {
 						if (activeTab != "contact.html") {
 							document.getElementById('contactNew').style.display = 'inline';
