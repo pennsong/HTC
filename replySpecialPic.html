@@ -33,24 +33,10 @@
 				data += "&clothesStyle=" + plus.storage.getItem('meetReplyClothesStyle');
 				data += "&meetId=" + plus.storage.getItem('meetReplyMeetId');
 
-				ppXhr(ppUrl + "matchMeet", "POST", data,
-					function(result) {
-						if (result.status == "OK") {
-							if (!result.match) {
-								plus.nativeUI.alert("回复条件不符, 将开启新邂逅", function() {}, "相信美好的事情即将发生", "好!");
-							}
-							ppXhr(ppUrl + "searchTargetPic", "POST", data,
-								displaySpecialPics,
-								function(xhr) {
-									alert("xhr请求失败：" + xhr.status);
-								}
-							);
-						} else {
-							alert("失败:" + result.msg.err);
-						}
-					},
-					function(result) {
-						alert("xhr请求失败：" + result.status);
+				ppXhr(ppUrl + "searchTargetPic", "POST", data,
+					displaySpecialPics,
+					function(xhr) {
+						alert("xhr请求失败：" + xhr.status);
 					}
 				);
 			}
